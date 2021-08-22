@@ -40,6 +40,7 @@ private slots:
     void onCurrentChanged(int index);
     void onUploadClientSuccess();
     void onUploadClientFailed(NetworkParams &params, QString &msg);
+    void onAnchorClicked(const QUrl &url);
 
 private:
     Ui::MessageWidget *ui;
@@ -58,8 +59,11 @@ private:
 signals:
     void downloadImage(QString strUrl, QString saveDir);
     void newMessageArrived();
-    void anchorClicked(const QUrl &url);
     void onlineUsers(QMap<QString, UserInfo> &onlineUserMap);
+    void onRequestFinished(NetworkParams &params);
+    void onUpdateRequestProcess(NetworkParams &params);
+    void onDownloadFileFailed(NetworkParams &params, QString &msg);
+    void downloadingFile(NetworkParams &params);
 };
 
 #endif // MESSAGEWIDGET_H

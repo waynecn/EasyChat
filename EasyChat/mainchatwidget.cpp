@@ -31,6 +31,9 @@ MainChatWidget::MainChatWidget(QWidget *parent) :
 
     connect(m_pMessageWidget, SIGNAL(onlineUsers(QMap<QString, UserInfo> &)), m_pUserListWidget, SLOT(OnOnelineUsersMessage(QMap<QString, UserInfo> &)));
     connect(m_pUserListWidget, SIGNAL(onItemDoubleClicked(QTableWidgetItem *)), m_pMessageWidget, SLOT(OnItemDoubleClicked(QTableWidgetItem *)));
+    connect(m_pMessageWidget, SIGNAL(downloadingFile(NetworkParams &)), this, SIGNAL(downloadingFile(NetworkParams &)));
+    connect(m_pMessageWidget, SIGNAL(onRequestFinished(NetworkParams &)), this, SIGNAL(downloadingFile(NetworkParams &)));
+    connect(m_pMessageWidget, SIGNAL(onUpdateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
 }
 
 MainChatWidget::~MainChatWidget()

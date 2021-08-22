@@ -38,6 +38,7 @@ SOURCES += \
         messagewidget.cpp \
         monitor.cpp \
         mynetworkcontroller.cpp \
+        mytablewidget.cpp \
         registerdlg.cpp \
         settingdlg.cpp \
         tools.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
         messagewidget.h \
         monitor.h \
         mynetworkcontroller.h \
+        mytablewidget.h \
         registerdlg.h \
         settingdlg.h \
         tools.h \

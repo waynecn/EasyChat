@@ -91,11 +91,15 @@ void FileWidget::OnProcessFile(NetworkParams &params) {
         int currentRow = ui->downLoadTableWidget->rowCount() - 1;
         params.itemRow = currentRow;
         QTableWidgetItem *fileName = new QTableWidgetItem(params.fileName);
-        fileName->setToolTip(params.fileName);
         QTableWidgetItem *requestTime = new QTableWidgetItem(params.requestTime);
         QTableWidgetItem *leftTime = new QTableWidgetItem(params.timeLeft);
         QTableWidgetItem *speed = new QTableWidgetItem(params.speed);
         QTableWidgetItem *doneTime = new QTableWidgetItem(params.requestEndTime);
+        fileName->setToolTip(params.saveFileDir + params.saveFileName);
+        requestTime->setToolTip(params.saveFileDir + params.saveFileName);
+        leftTime->setToolTip(params.saveFileDir + params.saveFileName);
+        speed->setToolTip(params.saveFileDir + params.saveFileName);
+        doneTime->setToolTip(params.saveFileDir + params.saveFileName);
         ui->downLoadTableWidget->setItem(currentRow, 0, fileName);
         ui->downLoadTableWidget->setItem(currentRow, 1, requestTime);
         ui->downLoadTableWidget->setItem(currentRow, 2, leftTime);

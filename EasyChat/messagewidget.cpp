@@ -51,6 +51,7 @@ MessageWidget::MessageWidget(QWidget *parent) :
     connect(&g_WebSocket, SIGNAL(textMessageReceived(const QString &)), this, SLOT(OnWebSocketMsgReceived(const QString &)));
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(OnTabCloseRequested(int)));
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
+    connect(m_pTextBrowser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
 }
 
 MessageWidget::~MessageWidget()
@@ -113,6 +114,7 @@ void MessageWidget::OnSendMessage(MessageStruct &msg) {
         }
         browser->setHtml("<html>" + m_messageMap[currentUserID] + "</html>");
         browser->moveCursor(QTextCursor::End);
+        connect(browser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
     }
     QByteArray byteMsg = tools::GetInstance()->GenerateWebsocketMsg(msg);
     qint64 ret = g_WebSocket.sendTextMessage(byteMsg);
@@ -247,7 +249,7 @@ void MessageWidget::OnWebSocketMsgReceived(const QString &msg) {
                     ui->tabWidget->addTab(pEdit, msgInfo.userName);
                     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
                     ui->tabWidget->setCurrentWidget(pEdit);
-                    connect(pEdit, SIGNAL(anchorClicked(const QUrl &)), this, SIGNAL(anchorClicked(const QUrl &)));
+                    connect(pEdit, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
                 } else {
                     ui->tabWidget->setCurrentIndex(nIndex);
                     QTextBrowser *pEdit = (QTextBrowser *)ui->tabWidget->widget(nIndex);
@@ -268,6 +270,7 @@ void MessageWidget::OnWebSocketMsgReceived(const QString &msg) {
                     }
                     pEdit->setHtml("<html>" + m_messageMap[msgInfo.userID] + "</html>");
                     pEdit->moveCursor(QTextCursor::End);
+                    connect(pEdit, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
                 }
                 emit newMessageArrived();
                 QApplication::alert(this);
@@ -352,6 +355,51 @@ void MessageWidget::onUploadClientSuccess() {
 
 void MessageWidget::onUploadClientFailed(NetworkParams &params, QString &msg) {
     QMessageBox::warning(nullptr, "Warn", "上传客户端:" + params.fileName + " 失败:" + msg);
+}
+
+void MessageWidget::onAnchorClicked(const QUrl &url) {
+    if (url.isEmpty()) {
+        return;
+    }
+    QString strUrl = url.toString();
+    qDebug() << "clicked:" << strUrl;
+    int index = strUrl.lastIndexOf("/");
+    QString originalFileName = strUrl.mid(index + 1);
+
+    QFileDialog fDlg;
+    fDlg.setAcceptMode(QFileDialog::AcceptSave);
+    fDlg.setFileMode(QFileDialog::AnyFile);
+    QSettings settings;
+    QString saveFileDir = settings.value(SETTING_SAVE_FILE_DIR, "C:/").toString();
+    QString saveFilePath = fDlg.getSaveFileName(this, "Save File", saveFileDir + originalFileName);
+    qDebug() << "fileName:" << saveFilePath;
+    if (saveFilePath.isEmpty()) {
+        return;
+    }
+
+    saveFilePath = saveFilePath.replace("\\", "/");
+    QString saveFileName = saveFilePath.mid(saveFilePath.lastIndexOf("/") + 1);
+    qDebug() << "download file:" << originalFileName << " save file:" << saveFileName;
+    NetworkParams params;
+    params.paramID = tools::GetInstance()->GenerateRandomID();
+    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.httpRequestType = REQUEST_DOWNLOAD_FILE;
+    params.fileName = originalFileName;
+    params.saveFileName = saveFileName;
+    params.userID = g_userID;
+    params.userName = g_userName;
+    params.saveFileDir = saveFilePath.mid(0, saveFilePath.lastIndexOf("/") + 1);
+
+    saveFileDir = params.saveFileDir;
+    settings.setValue(SETTING_SAVE_FILE_DIR, saveFileDir);
+
+    MyNetworkController *controller = new MyNetworkController(params);
+    connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SIGNAL(onRequestFinished(NetworkParams &)));
+    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(onUpdateRequestProcess(NetworkParams &)));
+    connect(controller, SIGNAL(downloadFileFailed(NetworkParams &, QString &)), this, SIGNAL(onDownloadFileFailed(NetworkParams &, QString &)));
+    controller->StartWork();
+    //emit upload file actions for file widget to show the uploading progress
+    emit downloadingFile(params);
 }
 
 void MessageWidget::uploadClient() {

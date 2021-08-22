@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QProgressBar>
 #include <QKeyEvent>
+#include <QMenu>
 
 namespace Ui {
 class FileWidget;
