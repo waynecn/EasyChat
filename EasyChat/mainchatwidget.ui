@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainChatWidget</class>
+ <widget class="QWidget" name="MainChatWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>758</width>
+    <height>466</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="10,1,2">
+     <property name="spacing">
+      <number>12</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="messageVerticalLayout"/>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="controlHorizontalLayout" stretch="0">
+       <item>
+        <widget class="QWidget" name="widget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+         <widget class="QPushButton" name="fileListPushButton">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>0</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>文件列表</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="sendFilePushButton">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>0</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>发送文件</string>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="inputMessageVerticalLayout"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="userListHorizontalLayout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
