@@ -89,7 +89,7 @@ void FileListTableWidget::mouseReleaseEvent(QMouseEvent *event) {
     event->ignore();
 }
 
-void FileListTableWidget::OnFileList(NetworkParams &params, QJsonArray &files) {
+void FileListTableWidget::OnFileList(QJsonArray &files) {
     this->resize(this->size());
     int size = files.size();
     this->setRowCount(size);
@@ -136,7 +136,7 @@ void FileListTableWidget::onRefreshFileList() {
     params.userID = g_userID;
     params.userName = g_userName;
     MyNetworkController *controller = new MyNetworkController(params);
-    connect(controller, SIGNAL(fileListRequestFinished(NetworkParams &, QJsonArray &)), this, SLOT(OnFileList(NetworkParams &, QJsonArray &)));
+    connect(controller, SIGNAL(fileListRequestFinished(QJsonArray &)), this, SLOT(OnFileList(QJsonArray &)));
     controller->StartWork();
 }
 

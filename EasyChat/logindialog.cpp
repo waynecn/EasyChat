@@ -57,7 +57,7 @@ void LoginDialog::keyReleaseEvent(QKeyEvent *e) {
     e->accept();
 }
 
-void LoginDialog::closeEvent(QCloseEvent */*e*/) {
+void LoginDialog::closeEvent(QCloseEvent *e) {
     accept();
     exit(0);
 }

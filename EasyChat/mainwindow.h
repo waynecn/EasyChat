@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#pragma execution_characters_set("utf-8")
+
 #include "maintabwidget.h"
 #include "mainchatwidget.h"
 #include "filewidget.h"

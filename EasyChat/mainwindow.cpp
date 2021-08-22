@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pMainTabWidget->addTab(m_pFileListTableWidget, "文件列表");
     this->setCentralWidget(m_pMainTabWidget);
 
-    connect(m_pMainChatWidget, SIGNAL(fileListRequestFinished(NetworkParams &, QJsonArray &)), m_pFileListTableWidget, SLOT(OnFileList(NetworkParams &, QJsonArray &)));
+    connect(m_pMainChatWidget, SIGNAL(fileListRequestFinished(QJsonArray &)), m_pFileListTableWidget, SLOT(OnFileList(QJsonArray &)));
     connect(m_pMainChatWidget, SIGNAL(uploadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(updateRequestProcess(NetworkParams &)), m_pFileWidget, SLOT(OnUpdateRequestProcess(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(downloadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));

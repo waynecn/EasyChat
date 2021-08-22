@@ -26,7 +26,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event);
 
 public slots:
-    void OnFileList(NetworkParams &params, QJsonArray &files);
+    void OnFileList(QJsonArray &files);
 
 private slots:
     void onItemClicked(QTableWidgetItem *item);

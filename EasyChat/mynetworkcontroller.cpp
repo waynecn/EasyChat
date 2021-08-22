@@ -301,7 +301,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
                 return;
             }
             QJsonArray files = jsonDoc["Files"].toArray();
-            emit fileListRequestFinished(m_networkParams, files);
+            emit fileListRequestFinished(files);
         } else if (REQUEST_DOWNLOAD_FILE == m_networkParams.httpRequestType) {
             if (m_networkParams.saveFileDir.isEmpty()) {
                 reply->deleteLater();

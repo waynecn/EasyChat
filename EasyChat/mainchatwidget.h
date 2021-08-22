@@ -46,7 +46,7 @@ private:
     bool m_bCtrlPressed;
 
 signals:
-    void fileListRequestFinished(NetworkParams &params, QJsonArray &array);
+    void fileListRequestFinished(QJsonArray &array);
     void uploadingFile(NetworkParams &params);
     void updateRequestProcess(NetworkParams &params);
     void downloadingFile(NetworkParams &params);

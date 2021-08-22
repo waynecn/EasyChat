@@ -197,7 +197,7 @@ void MainChatWidget::on_fileListPushButton_clicked()
     params.requestTime = tools::GetInstance()->GetCurrentTime();
 
     MyNetworkController *controller = new MyNetworkController(params);
-    connect(controller, SIGNAL(fileListRequestFinished(NetworkParams &, QJsonArray &)), this, SIGNAL(fileListRequestFinished(NetworkParams &, QJsonArray &)));
+    connect(controller, SIGNAL(fileListRequestFinished(QJsonArray &)), this, SIGNAL(fileListRequestFinished(QJsonArray &)));
     controller->StartWork();
 }
 

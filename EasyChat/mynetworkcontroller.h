@@ -42,7 +42,7 @@ private slots:
 
 signals:
     void requestFinished(NetworkParams &params);
-    void fileListRequestFinished(NetworkParams &params, QJsonArray &array);
+    void fileListRequestFinished(QJsonArray &array);
     void updateRequestProcess(NetworkParams &params);
     void loginFailed(QString &msg);
     void loginSuccess();
