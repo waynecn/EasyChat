@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pMainChatWidget, SIGNAL(uploadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(updateRequestProcess(NetworkParams &)), m_pFileWidget, SLOT(OnUpdateRequestProcess(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(downloadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
+    connect(m_pMainChatWidget, SIGNAL(uploadingClient(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pFileListTableWidget, SIGNAL(downloadItem(QTableWidgetItem *)), m_pMainChatWidget, SLOT(OnDownloadItem(QTableWidgetItem *)));
     m_pMainChatWidget->QueryFileList();
 }

@@ -61,9 +61,10 @@ signals:
     void newMessageArrived();
     void onlineUsers(QMap<QString, UserInfo> &onlineUserMap);
     void onRequestFinished(NetworkParams &params);
-    void onUpdateRequestProcess(NetworkParams &params);
     void onDownloadFileFailed(NetworkParams &params, QString &msg);
     void downloadingFile(NetworkParams &params);
+    void updateRequestProcess(NetworkParams &params);
+    void uploadingClient(NetworkParams &params);
 };
 
 #endif // MESSAGEWIDGET_H

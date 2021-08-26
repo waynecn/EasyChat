@@ -395,7 +395,7 @@ void MessageWidget::onAnchorClicked(const QUrl &url) {
 
     MyNetworkController *controller = new MyNetworkController(params);
     connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SIGNAL(onRequestFinished(NetworkParams &)));
-    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(onUpdateRequestProcess(NetworkParams &)));
+    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
     connect(controller, SIGNAL(downloadFileFailed(NetworkParams &, QString &)), this, SIGNAL(onDownloadFileFailed(NetworkParams &, QString &)));
     controller->StartWork();
     //emit upload file actions for file widget to show the uploading progress
@@ -462,5 +462,7 @@ void MessageWidget::uploadClient() {
     MyNetworkController *controller = new MyNetworkController(params);
     connect(controller, SIGNAL(uploadClientSuccess()), this, SLOT(onUploadClientSuccess()));
     connect(controller, SIGNAL(uploadClientFailed(NetworkParams &, QString &)), this, SLOT(onUploadClientFailed(NetworkParams &, QString &)));
+    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
     controller->StartWork();
+    emit uploadingClient(params);
 }

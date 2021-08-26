@@ -59,7 +59,7 @@ void FileWidget::keyReleaseEvent(QKeyEvent *e) {
 }
 
 void FileWidget::OnProcessFile(NetworkParams &params) {
-    if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
+    if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType) {
         if (!m_progressBarMap.contains(params.paramID)) {
             QProgressBar *progress = new QProgressBar();
             m_progressBarMap[params.paramID] = progress;
@@ -112,7 +112,7 @@ void FileWidget::OnProcessFile(NetworkParams &params) {
 
 void FileWidget::OnUpdateRequestProcess(NetworkParams &params) {
     if (m_progressBarMap.contains(params.paramID)) {
-        if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
+        if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType) {
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 2)->setText(QString("%1s").arg(params.timeLeft));
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 3)->setText(QString("%1kB/s").arg(params.speed));
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 5)->setText(params.requestEndTime);

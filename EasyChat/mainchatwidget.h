@@ -50,6 +50,7 @@ signals:
     void uploadingFile(NetworkParams &params);
     void updateRequestProcess(NetworkParams &params);
     void downloadingFile(NetworkParams &params);
+    void uploadingClient(NetworkParams &params);
 };
 
 #endif // MAINCHATWIDGET_H

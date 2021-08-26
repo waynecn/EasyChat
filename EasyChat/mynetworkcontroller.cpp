@@ -414,6 +414,8 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
                 delete m_pFile;
                 m_pFile = nullptr;
             }
+            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime();
+            emit updateRequestProcess(m_networkParams);
             emit uploadClientSuccess();
         }
     } else {
