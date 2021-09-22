@@ -13,7 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pMainChatWidget(nullptr),
     m_pFileWidget(nullptr),
     m_pFileListTableWidget(nullptr),
-    m_bCtrlPressed(false)
+    m_bCtrlPressed(false),
+    m_bFirstRun(true)
 {
     Qt::WindowFlags flags= this->windowFlags();
     setWindowFlags(flags&~Qt::WindowContextHelpButtonHint);
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setCentralWidget(m_pMainTabWidget);
 
     connect(m_pMainChatWidget, SIGNAL(fileListRequestFinished(QJsonArray &)), m_pFileListTableWidget, SLOT(OnFileList(QJsonArray &)));
+    connect(m_pMainChatWidget, SIGNAL(fileListRequestFinished(QJsonArray &)), this, SLOT(onFileListButtonClicked()));
     connect(m_pMainChatWidget, SIGNAL(uploadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(updateRequestProcess(NetworkParams &)), m_pFileWidget, SLOT(OnUpdateRequestProcess(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(downloadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
@@ -76,6 +78,13 @@ void MainWindow::keyReleaseEvent(QKeyEvent *e) {
     }
 
     e->accept();
+}
+
+void MainWindow::onFileListButtonClicked() {
+    if (!m_bFirstRun) {
+        m_pMainTabWidget->setCurrentWidget(m_pFileListTableWidget);
+    }
+    m_bFirstRun = false;
 }
 
 

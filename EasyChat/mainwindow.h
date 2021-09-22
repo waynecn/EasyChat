@@ -26,6 +26,7 @@ public:
     void keyReleaseEvent(QKeyEvent *e);
 
 private slots:
+    void onFileListButtonClicked();
 
 private:
     Ui::MainWindow *ui;
@@ -36,6 +37,7 @@ private:
     QString m_strWebsocketUrl;
     FileListTableWidget *m_pFileListTableWidget;
     bool m_bCtrlPressed;
+    bool m_bFirstRun;
 
 signals:
 };
