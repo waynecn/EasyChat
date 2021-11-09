@@ -80,9 +80,6 @@ void FileListTableWidget::mousePressEvent(QMouseEvent *event) {
 
 void FileListTableWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::RightButton) {
-        if (currentItem() == nullptr) {
-            return;
-        }
         m_pMenu->exec(event->globalPos());
     }
     if (event->button() == Qt::LeftButton) {
@@ -118,6 +115,9 @@ void FileListTableWidget::onItemClicked(QTableWidgetItem *item) {
 }
 
 void FileListTableWidget::onCopyLink() {
+    if (this->currentItem() == nullptr) {
+        return;
+    }
     QString url = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + this->item(this->currentItem()->row(), 0)->text();
 
     QClipboard *clipboard = QGuiApplication::clipboard();
