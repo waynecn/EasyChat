@@ -80,7 +80,9 @@ void FileListTableWidget::mousePressEvent(QMouseEvent *event) {
 
 void FileListTableWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::RightButton) {
-
+        if (currentItem() == nullptr) {
+            return;
+        }
         m_pMenu->exec(event->globalPos());
     }
     if (event->button() == Qt::LeftButton) {
@@ -123,6 +125,9 @@ void FileListTableWidget::onCopyLink() {
 }
 void FileListTableWidget::download() {
     QTableWidgetItem *item = this->currentItem();
+    if (item == nullptr) {
+        return;
+    }
     QTableWidgetItem *fileNameItem = this->item(item->row(), 0);
 
     emit downloadItem(fileNameItem);
@@ -142,6 +147,9 @@ void FileListTableWidget::onRefreshFileList() {
 
 void FileListTableWidget::deleteFile() {
     QTableWidgetItem *item = currentItem();
+    if (item == nullptr) {
+        return;
+    }
     QTableWidgetItem *fileNameItem = this->item(item->row(), 0);
 
     QString fileName = fileNameItem->text();
@@ -170,15 +178,6 @@ void FileListTableWidget::deleteFile() {
 }
 
 void FileListTableWidget::onDeleteFileSuccess() {
-//    NetworkParams params;
-//    params.paramID = tools::GetInstance()->GenerateRandomID();
-//    params.httpRequestType = REQUEST_GET_UPLOAD_FILES;
-//    params.userID = g_userID;
-//    params.userName = g_userName;
-//    params.requestTime = tools::GetInstance()->GetCurrentTime();
-//    MyNetworkController *controller = new MyNetworkController(params);
-//    connect(controller, SIGNAL(fileListRequestFinished(NetworkParams &, QJsonArray &)), this, SLOT(OnFileList(NetworkParams &, QJsonArray &)));
-//    controller->StartWork();
     onRefreshFileList();
 }
 
