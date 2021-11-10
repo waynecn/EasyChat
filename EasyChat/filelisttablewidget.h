@@ -27,12 +27,12 @@ public:
 
 public slots:
     void OnFileList(QJsonArray &files);
+    void onRefreshFileList();
 
 private slots:
     void onItemClicked(QTableWidgetItem *item);
     void onCopyLink();
     void download();
-    void onRefreshFileList();
     void deleteFile();
     void onDeleteFileSuccess();
     void onDeleteFileFailed(NetworkParams &params, QString &msg);

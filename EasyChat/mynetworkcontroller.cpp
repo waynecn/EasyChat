@@ -37,6 +37,11 @@ void MyNetworkController::SetNetworkParams(NetworkParams &params) {
 }
 
 void MyNetworkController::StartWork() {
+    if (g_serverHost.isEmpty() || g_serverPort.isEmpty()) {
+        QSettings settings;
+        g_serverHost = settings.value(SETTING_CURRENT_SERVER_HOST).toString();
+        g_serverPort = settings.value(SETTING_SERVER_PORT).toString();
+    }
     if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE) {
         uploadFile();
     } else if (m_networkParams.httpRequestType == REQUEST_GET_UPLOAD_FILES) {

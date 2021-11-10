@@ -82,3 +82,20 @@ QString tools::FileMD5(QString &filePath) {
     }
     return QString();
 }
+
+QString tools::FileSizeToString(qlonglong fileSize) {
+    QString ret;
+    if (fileSize / 1024 == 0) {
+        return QString("%1b").arg(fileSize);
+    } else if (fileSize / (1024 * 1024) == 0) {
+        return QString("%1K").arg((fileSize * 1.0) / (1024.0));
+    } else if (fileSize / (1024 * 1024 * 1024) == 0) {
+        return QString("%1M").arg((fileSize * 1.0) / (1024 * 1024 * 1.0));
+    } else if (fileSize / (1024 * 1024 * 1024 * 1024) == 0) {
+        return QString("%1G").arg((fileSize * 1.0) / (1024 * 1024 * 1024 * 1.0));
+    } else if (fileSize / (1024 * 1024 * 1024 * 1024 * 1024) == 0) {
+        return QString("%1T").arg((fileSize * 1.0) / (1024 * 1024 * 1024 * 1024 * 1.0));
+    } else {
+        return QString("%1b").arg(fileSize);
+    }
+}

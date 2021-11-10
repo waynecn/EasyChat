@@ -20,6 +20,7 @@ public:
     QByteArray GenerateOnlineUserMessage();
     QString GenerateRandomID();
     QString FileMD5(QString &filePath);
+    QString FileSizeToString(qlonglong fileSize);
 private:
     tools();
 };

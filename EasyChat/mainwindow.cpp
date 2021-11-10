@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pMainChatWidget, SIGNAL(downloadingFile(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pMainChatWidget, SIGNAL(uploadingClient(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pFileListTableWidget, SIGNAL(downloadItem(QTableWidgetItem *)), m_pMainChatWidget, SLOT(OnDownloadItem(QTableWidgetItem *)));
+    connect(m_pMainTabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
     m_pMainChatWidget->QueryFileList();
 }
 
@@ -85,6 +86,12 @@ void MainWindow::onFileListButtonClicked() {
         m_pMainTabWidget->setCurrentWidget(m_pFileListTableWidget);
     }
     m_bFirstRun = false;
+}
+
+void MainWindow::onCurrentChanged(int index) {
+    if (index == 2) {
+        m_pFileListTableWidget->onRefreshFileList();
+    }
 }
 
 

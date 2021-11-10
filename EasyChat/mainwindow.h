@@ -27,6 +27,7 @@ public:
 
 private slots:
     void onFileListButtonClicked();
+    void onCurrentChanged(int index);
 
 private:
     Ui::MainWindow *ui;

@@ -97,7 +97,7 @@ void FileListTableWidget::OnFileList(QJsonArray &files) {
         QJsonObject obj = files[i].toObject();
         QTableWidgetItem *item = new QTableWidgetItem(obj["FileName"].toString());
         this->setItem(i, 0, item);
-        this->setItem(i, 1, new QTableWidgetItem(QString("%1").arg(obj["FileSize"].toInt())));
+        this->setItem(i, 1, new QTableWidgetItem(QString("%1").arg(tools::GetInstance()->FileSizeToString(obj["FileSize"].toVariant().toLongLong()))));
         QString uploadUser = obj["UploadUser"].toObject()["Valid"].toBool() ? obj["UploadUser"].toObject()["String"].toString() : "未知";
         this->setItem(i, 2, new QTableWidgetItem(uploadUser));
         this->setItem(i, 3, new QTableWidgetItem("下载"));
