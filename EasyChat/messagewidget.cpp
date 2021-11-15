@@ -3,6 +3,7 @@
 #include "tools.h"
 #include "settingdlg.h"
 #include "mynetworkcontroller.h"
+#include "clientthread.h"
 
 #include <QJsonParseError>
 #include <QJsonObject>
@@ -76,6 +77,10 @@ void MessageWidget::keyPressEvent(QKeyEvent *e) {
         uploadClient();
     }
 
+    if (m_bCtrlPressed && e->key() == Qt::Key_T) {
+        uploadFileByTCP();
+    }
+
     e->accept();
 }
 
@@ -87,7 +92,7 @@ void MessageWidget::keyReleaseEvent(QKeyEvent *e) {
     e->accept();
 }
 
-void MessageWidget::SendMessage(MessageStruct &msg) {
+void MessageWidget::SendMessage2(MessageStruct &msg) {
     OnSendMessage(msg);
 }
 
@@ -188,7 +193,7 @@ void MessageWidget::OnWebSocketMsgReceived(const QString &msg) {
                     UserInfo userInfo;
                     userInfo.userID = strUserId;
                     userInfo.userName = jsonOnline["username"].toString();
-                    userInfo.loginTime = tools::GetInstance()->GetCurrentTime();
+                    userInfo.loginTime = tools::GetInstance()->GetCurrentTime2();
                     m_onlineUserMap[strUserId] = userInfo;
                 }
             }
@@ -382,7 +387,7 @@ void MessageWidget::onAnchorClicked(const QUrl &url) {
     qDebug() << "download file:" << originalFileName << " save file:" << saveFileName;
     NetworkParams params;
     params.paramID = tools::GetInstance()->GenerateRandomID();
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
     params.httpRequestType = REQUEST_DOWNLOAD_FILE;
     params.fileName = originalFileName;
     params.saveFileName = saveFileName;
@@ -454,7 +459,7 @@ void MessageWidget::uploadClient() {
     NetworkParams params;
     params.httpRequestType = REQUEST_UPLOAD_CLIENT;
     params.paramID = tools::GetInstance()->GenerateRandomID();
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
     params.userID = g_userID;
     params.userName = g_userName;
     params.fileName = fileName;
@@ -465,4 +470,46 @@ void MessageWidget::uploadClient() {
     connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
     controller->StartWork();
     emit uploadingClient(params);
+}
+
+void MessageWidget::uploadFileByTCP() {
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setViewMode(QFileDialog::Detail);
+    QString filePath;
+    if (dialog.exec()) {
+        QStringList files = dialog.selectedFiles();
+        if (files.size() > 0) {
+            filePath = files[0];
+        }
+    }
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    filePath = filePath.replace("\\", "/");
+    qDebug() << "filePath:" << filePath;
+
+    NetworkParams params;
+    params.paramID = tools::GetInstance()->GenerateRandomID();
+    params.httpRequestType = REQUEST_UPLOAD_FILE_BY_TCP;
+    params.paramID = tools::GetInstance()->GenerateRandomID();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
+    params.userID = g_userID;
+    params.userName = g_userName;
+    params.fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+    params.filePath = filePath;
+    params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + params.fileName;
+    MyNetworkController *controller = new MyNetworkController(params);
+    connect(controller, SIGNAL(uploadClientSuccess()), this, SLOT(onUploadClientSuccess()));
+    connect(controller, SIGNAL(uploadClientFailed(NetworkParams &, QString &)), this, SLOT(onUploadClientFailed(NetworkParams &, QString &)));
+    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+    controller->StartWork();
+    emit uploadingClient(params);
+    return;
+
+    //直接使用线程调用client发送文件，但是这样进度没法在文件列表展示进度
+//    ClientThread *thread = new ClientThread(filePath, g_userName);
+//    thread->start();
 }

@@ -26,6 +26,8 @@ private:
     void registerUser();
     void deleteFile();
     void uploadClient();
+    void uploadFileByTCP();
+    void downloadFileByTCP();
 
 private:
     NetworkParams m_networkParams;

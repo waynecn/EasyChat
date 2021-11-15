@@ -65,7 +65,7 @@ void RegisterDlg::on_okBtn_clicked()
     params.userName = ui->userNameLineEdit->text();
     params.password = ui->passwordLineEdit->text();
     params.phoneNumber = ui->mobileLineEdit->text();
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
 
     MyNetworkController *controller = new MyNetworkController(params);
     connect(controller, SIGNAL(registerFailed(QString &)), this, SLOT(onRegisterFailed(QString &)));

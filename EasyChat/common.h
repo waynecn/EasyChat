@@ -4,6 +4,8 @@
 #include <QString>
 #include <QtWebSockets/QWebSocket>
 
+const int               BUFF_SIZE = 1024 * 1024;
+
 const QString SETTING_SERVER_HOST_LIST = "SETTING_SERVER_HOST_LIST";
 const QString SETTING_CURRENT_SERVER_HOST = "SETTING_CURRENT_SERVER_HOST";
 const QString SETTING_WEBSOCKET_SERVER_HOST = "WEBSOCKET_SERVER_HOST";
@@ -12,8 +14,9 @@ const QString SETTING_USERNAME = "SETTING_USERNAME";
 const QString SETTING_USERPASSWORD = "SETTING_USERPASSWORD";
 const QString SETTING_REMEMBER_PASSWORD = "SETTING_REMEMBER_PASSWORD";
 const QString SETTING_SAVE_FILE_DIR = "SETTING_SAVE_FILE_DIR";
+const QString SETTING_USE_TCP = "SETTING_USE_TCP";
 
-static QString APPLICATION_VERSION = "1.1.7";
+static QString APPLICATION_VERSION = "1.1.8";
 
 extern QString g_userID;        //current logined user info
 extern QString g_userName;      //current logined user info
@@ -48,7 +51,9 @@ enum HttpRequest {
     REQUEST_GET_UPLOAD_FILES,
     REQUEST_DELETE_FILE,
     REQUEST_UPLOAD_CLIENT,
-    REQUEST_DOWNLOAD_CLIENT
+    REQUEST_DOWNLOAD_CLIENT,
+    REQUEST_UPLOAD_FILE_BY_TCP,
+    REQUEST_DOWNLOAD_FILE_BY_TCP
 };
 
 typedef struct _messageStruct{
@@ -91,7 +96,7 @@ typedef struct _network_param {
     QString         saveFileDir;    //file save directory
 
     int             itemRow;        //this param row index in upload or download tablewidget
-    qint64          totalSize;      //this item is only used when processing file
+    quint64          totalSize;      //this item is only used when processing file
     qint64          recved;         //this item is only used when processing file
     qint64          timeLeft;       //this item is only used when processing file
     qint64          speed;          //this item is only used when processing file
@@ -114,7 +119,7 @@ typedef struct _network_param {
         saveFileDir = "";
 
         itemRow = -1;
-        totalSize = -1;
+        totalSize = 0;
         recved = -1;
         timeLeft = -1;
         speed = -1;

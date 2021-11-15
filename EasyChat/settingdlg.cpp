@@ -16,6 +16,7 @@ SettingDlg::SettingDlg(QWidget *parent) :
     QSettings setting;
     QString host = setting.value(SETTING_WEBSOCKET_SERVER_HOST, "").toString();
     QString port = setting.value(SETTING_SERVER_PORT, "").toString();
+    bool bTCP = setting.value(SETTING_USE_TCP, false).toBool();
     if (!host.isEmpty()) {
         QStringList ipList = host.split(",");
         for (int i = 0; i < ipList.size(); ++i) {
@@ -28,6 +29,7 @@ SettingDlg::SettingDlg(QWidget *parent) :
     if (!port.isEmpty()) {
         ui->portLineEdit->setText(port);
     }
+    ui->TCPSwitchRadio->setChecked(bTCP);
 
     ui->versionLabel->setText("当前版本：" + APPLICATION_VERSION);
 }
@@ -41,6 +43,7 @@ void SettingDlg::on_okBtn_clicked()
 {
     QString currentIP = ui->ipList->currentText();
     QString port = ui->portLineEdit->text();
+    bool bTCP = ui->TCPSwitchRadio->isChecked();
     if (currentIP.isEmpty() || port.isEmpty()) {
         QString msg = "IP或端口不能为空";
         QMessageBox box;
@@ -92,7 +95,9 @@ void SettingDlg::on_okBtn_clicked()
     QString oldIP = setting.value(SETTING_WEBSOCKET_SERVER_HOST).toString();
     QString oldPort = setting.value(SETTING_SERVER_PORT).toString();
     QString currentServerHost = setting.value(SETTING_CURRENT_SERVER_HOST).toString();
-    if ((!currentServerHost.isEmpty() || !oldPort.isEmpty()) && (currentServerHost != currentIP || oldPort != port)) {
+    bool useTCP = setting.value(SETTING_USE_TCP, false).toBool();
+    if (((!currentServerHost.isEmpty() || !oldPort.isEmpty()) && (currentServerHost != currentIP || oldPort != port)) ||
+            useTCP != bTCP) {
         QString msg = "配置发生改变,需要重启程序";
         QMessageBox box;
         box.setWindowTitle("提示");
@@ -119,6 +124,7 @@ void SettingDlg::on_okBtn_clicked()
     }
     setting.setValue(SETTING_CURRENT_SERVER_HOST, ui->ipList->currentText());
     setting.setValue(SETTING_SERVER_PORT, port);
+    setting.setValue(SETTING_USE_TCP, bTCP);
     accept();
     if (bExit) {
         RestartApp();

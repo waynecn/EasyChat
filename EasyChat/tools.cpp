@@ -13,7 +13,7 @@ tools::tools()
 
 }
 
-QString tools::GetCurrentTime() {
+QString tools::GetCurrentTime2() {
     return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 }
 
@@ -83,18 +83,23 @@ QString tools::FileMD5(QString &filePath) {
     return QString();
 }
 
-QString tools::FileSizeToString(qlonglong fileSize) {
-    QString ret;
-    if (fileSize / 1024 == 0) {
+QString tools::FileSizeToString(qulonglong fileSize) {
+    //return QString("%1byte").arg(fileSize);
+    static qulonglong size1 = 1024;
+    static qulonglong size2 = size1 * size1;
+    static qulonglong size3 = size2 * size1;
+    static qulonglong size4 = size3 * size1;
+    static qulonglong size5 = size4 * size1;
+    if (fileSize / size1 == 0) {
         return QString("%1b").arg(fileSize);
-    } else if (fileSize / (1024 * 1024) == 0) {
-        return QString("%1K").arg((fileSize * 1.0) / (1024.0));
-    } else if (fileSize / (1024 * 1024 * 1024) == 0) {
-        return QString("%1M").arg((fileSize * 1.0) / (1024 * 1024 * 1.0));
-    } else if (fileSize / (1024 * 1024 * 1024 * 1024) == 0) {
-        return QString("%1G").arg((fileSize * 1.0) / (1024 * 1024 * 1024 * 1.0));
-    } else if (fileSize / (1024 * 1024 * 1024 * 1024 * 1024) == 0) {
-        return QString("%1T").arg((fileSize * 1.0) / (1024 * 1024 * 1024 * 1024 * 1.0));
+    } else if ((fileSize / size2) == 0) {
+        return QString("%1K").arg((fileSize * 1.0) / size1);
+    } else if ((fileSize / size3) == 0) {
+        return QString("%1M").arg((fileSize * 1.0) / (size2 * 1.0));
+    } else if ((fileSize / size4) == 0) {
+        return QString("%1G").arg((fileSize * 1.0) / (size3 * 1.0));
+    } else if ((fileSize / size5) == 0) {
+        return QString("%1T").arg((fileSize * 1.0) / (size4 * 1.0));
     } else {
         return QString("%1b").arg(fileSize);
     }

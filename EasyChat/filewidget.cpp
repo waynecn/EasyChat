@@ -59,7 +59,8 @@ void FileWidget::keyReleaseEvent(QKeyEvent *e) {
 }
 
 void FileWidget::OnProcessFile(NetworkParams &params) {
-    if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType) {
+    if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType ||
+            REQUEST_UPLOAD_FILE_BY_TCP == params.httpRequestType) {
         if (!m_progressBarMap.contains(params.paramID)) {
             QProgressBar *progress = new QProgressBar();
             m_progressBarMap[params.paramID] = progress;
@@ -81,7 +82,8 @@ void FileWidget::OnProcessFile(NetworkParams &params) {
         ui->uploadTableWidget->setCellWidget(currentRow, 4, m_progressBarMap[params.paramID]);
         ui->uploadTableWidget->setItem(currentRow, 5, doneTime);
         m_networkParamsMap[params.paramID] = params;
-    } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE || params.httpRequestType == REQUEST_DOWNLOAD_CLIENT) {
+    } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE || params.httpRequestType == REQUEST_DOWNLOAD_CLIENT ||
+               params.httpRequestType == REQUEST_DOWNLOAD_FILE_BY_TCP) {
         if (!m_progressBarMap.contains(params.paramID)) {
             QProgressBar *progress = new QProgressBar();
             progress->setMaximum(params.totalSize);
@@ -111,24 +113,35 @@ void FileWidget::OnProcessFile(NetworkParams &params) {
 }
 
 void FileWidget::OnUpdateRequestProcess(NetworkParams &params) {
+    //if the totalSize was too big, then setMaximum function will lose precision. The code below make the progress bar available again.
+    qint64 unit = params.totalSize / 100;
+    int max = 100;
+    int val = 0;
+    if (unit != 0) {
+        max = params.totalSize / unit;
+        val = params.recved / unit;
+    }
     if (m_progressBarMap.contains(params.paramID)) {
-        if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType) {
+        if (params.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == params.httpRequestType ||
+                REQUEST_UPLOAD_FILE_BY_TCP == params.httpRequestType) {
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 2)->setText(QString("%1s").arg(params.timeLeft));
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 3)->setText(QString("%1kB/s").arg(params.speed));
             ui->uploadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 5)->setText(params.requestEndTime);
             if (params.totalSize == 0 || params.recved == 0) {
-                m_progressBarMap[params.paramID]->setMaximum(1);
-                m_progressBarMap[params.paramID]->setValue(1);
+                m_progressBarMap[params.paramID]->setMaximum(max);
+                m_progressBarMap[params.paramID]->setValue(max);
             } else {
-                m_progressBarMap[params.paramID]->setMaximum(params.totalSize);
-                m_progressBarMap[params.paramID]->setValue(params.recved);
+                m_progressBarMap[params.paramID]->setMaximum(max);
+                m_progressBarMap[params.paramID]->setValue(val);
             }
-        } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
+        } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE || params.httpRequestType == REQUEST_DOWNLOAD_FILE_BY_TCP) {
             ui->downLoadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 2)->setText(QString("%1s").arg(params.timeLeft));
             ui->downLoadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 3)->setText(QString("%1kB/s").arg(params.speed));
             ui->downLoadTableWidget->item(m_networkParamsMap[params.paramID].itemRow, 5)->setText(params.requestEndTime);
-            m_progressBarMap[params.paramID]->setMaximum(params.totalSize);
-            m_progressBarMap[params.paramID]->setValue(params.recved);
+            m_progressBarMap[params.paramID]->setMaximum(max);
+            m_progressBarMap[params.paramID]->setValue(val);
         }
+    } else {
+        qDebug() << "m_progressBarMap doesn't contain params.paramsID:" << params.paramID;
     }
 }

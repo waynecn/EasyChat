@@ -67,7 +67,7 @@ void LoginDialog::on_loginPushButton_clicked()
     NetworkParams params;
     params.httpRequestType = REQUEST_LOGIN;
     params.paramID = tools::GetInstance()->GenerateRandomID();
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
     params.userName = ui->userNameLineEdit->text();
     params.password = ui->passwordLineEdit->text();
     if (params.userName.isEmpty() || params.password.isEmpty()) {

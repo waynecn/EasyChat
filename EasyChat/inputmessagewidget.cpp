@@ -52,7 +52,7 @@ void InputMessageWidget::on_sendMessagePushButton_clicked()
     msgStruct.msg = msg;
     msgStruct.userID = g_userID;
     msgStruct.userName = g_userName;
-    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime();
+    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
 
     emit sendMessage(msgStruct);
     ui->inputMessageTextEdit->clear();

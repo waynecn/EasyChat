@@ -25,6 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        client.cpp \
+        clientthread.cpp \
         common.cpp \
         controller.cpp \
         filelisttablewidget.cpp \
@@ -45,6 +47,8 @@ SOURCES += \
         userlistwidget.cpp
 
 HEADERS += \
+        client.h \
+        clientthread.h \
         common.h \
         controller.h \
         filelisttablewidget.h \
@@ -86,6 +90,8 @@ DISTFILES += \
     logo.rc
 
 RC_FILE += logo.rc
+
+LIBS += -lws2_32
 
 msvc{
     QMAKE_CFLAGS += /utf-8

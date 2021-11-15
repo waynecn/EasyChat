@@ -18,7 +18,7 @@ FileListTableWidget::FileListTableWidget(QWidget *parent) :
     ui->setupUi(this);
     setSelectionMode(QAbstractItemView::SingleSelection);
 
-    this->setColumnCount(4);
+    this->setColumnCount(5);
     this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     this->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -27,6 +27,7 @@ FileListTableWidget::FileListTableWidget(QWidget *parent) :
     headerLables.push_back(" 文件 ");
     headerLables.push_back(" 文件大小 ");
     headerLables.push_back(" 用户 ");
+    headerLables.push_back(" 上传时间 ");
     headerLables.push_back(" 操作 ");
     this->setHorizontalHeaderLabels(headerLables);
 
@@ -97,16 +98,21 @@ void FileListTableWidget::OnFileList(QJsonArray &files) {
         QJsonObject obj = files[i].toObject();
         QTableWidgetItem *item = new QTableWidgetItem(obj["FileName"].toString());
         this->setItem(i, 0, item);
-        this->setItem(i, 1, new QTableWidgetItem(QString("%1").arg(tools::GetInstance()->FileSizeToString(obj["FileSize"].toVariant().toLongLong()))));
+        this->setItem(i, 1, new QTableWidgetItem(QString("%1").arg(tools::GetInstance()->FileSizeToString(obj["FileSize"].toVariant().toULongLong()))));
         QString uploadUser = obj["UploadUser"].toObject()["Valid"].toBool() ? obj["UploadUser"].toObject()["String"].toString() : "未知";
         this->setItem(i, 2, new QTableWidgetItem(uploadUser));
-        this->setItem(i, 3, new QTableWidgetItem("下载"));
+        QString createTime = obj["CreateTime"].toObject()["Valid"].toBool() ? obj["CreateTime"].toObject()["Time"].toString() : "未知";
+        this->setItem(i, 3, new QTableWidgetItem(createTime));
+        this->setItem(i, 4, new QTableWidgetItem("下载"));
     }
     update();
 }
 
 void FileListTableWidget::onItemClicked(QTableWidgetItem *item) {
-    if (item->column() == 3) {
+    if (item == nullptr) {
+        return;
+    }
+    if (item->column() == 4) {
         qDebug() << item->text();
         QTableWidgetItem * fileNameItem = this->item(item->row(), 0);
 
@@ -137,7 +143,7 @@ void FileListTableWidget::onRefreshFileList() {
     NetworkParams params;
     params.paramID = tools::GetInstance()->GenerateRandomID();
     params.httpRequestType = REQUEST_GET_UPLOAD_FILES;
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
     params.userID = g_userID;
     params.userName = g_userName;
     MyNetworkController *controller = new MyNetworkController(params);
@@ -170,7 +176,7 @@ void FileListTableWidget::deleteFile() {
     params.fileName = fileName;
     params.userID = g_userID;
     params.userName = g_userName;
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
     MyNetworkController *controller = new MyNetworkController(params);
     connect(controller, SIGNAL(deleteFileSuccess()), this, SLOT(onDeleteFileSuccess()));
     connect(controller, SIGNAL(deleteFileFailed(NetworkParams &, QString &)), this, SLOT(onDeleteFileFailed(NetworkParams &, QString &)));

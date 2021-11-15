@@ -1,5 +1,6 @@
 #include "mynetworkcontroller.h"
 #include "tools.h"
+#include "clientthread.h"
 
 #include <QFile>
 #include <QHttpMultiPart>
@@ -56,6 +57,10 @@ void MyNetworkController::StartWork() {
         deleteFile();
     } else if (REQUEST_UPLOAD_CLIENT == m_networkParams.httpRequestType) {
         uploadClient();
+    } else if (REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
+        uploadFileByTCP();
+    } else if (REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
+        downloadFileByTCP();
     }
 }
 
@@ -232,13 +237,31 @@ void MyNetworkController::uploadClient() {
     m_tStart = QTime::currentTime();
 }
 
+void MyNetworkController::uploadFileByTCP() {
+    m_tStart = QTime::currentTime();
+    QFile f(m_networkParams.filePath);
+    f.open(QIODevice::ReadOnly);
+    qint64 fileSize = f.size();
+    m_networkParams.totalSize = fileSize;
+    ClientThread *thread = new ClientThread(m_networkParams);
+    connect(thread, SIGNAL(updateProgressSignal(qint64, qint64)), this, SLOT(onRequestProgress(qint64, qint64)));
+    thread->start();
+}
+
+void MyNetworkController::downloadFileByTCP() {
+    m_tStart = QTime::currentTime();
+    ClientThread *thread = new ClientThread(m_networkParams);
+    connect(thread, SIGNAL(updateProgressSignal(qint64, qint64)), this, SLOT(onRequestProgress(qint64, qint64)));
+    thread->start();
+}
+
 void MyNetworkController::upLoadError(QNetworkReply::NetworkError err) {
     qDebug() << "request:" << m_networkParams.httpRequestType << " upload file:" << m_networkParams.fileName << " error. err:" << err;
 }
 
 void MyNetworkController::onRequestProgress(qint64 recved, qint64 total) {
     m_networkParams.recved = recved;
-    if (m_networkParams.totalSize < 0) {
+    if (m_networkParams.totalSize <= 0) {
         m_networkParams.totalSize = total;
     }
     QTime curTime = QTime::currentTime();
@@ -260,9 +283,12 @@ void MyNetworkController::onRequestProgress(qint64 recved, qint64 total) {
         downloadSpeed = qAbs(recved / (msecTo * 1024 / 1000));
     }
     m_networkParams.speed = downloadSpeed;
-    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == m_networkParams.httpRequestType) {
-        emit updateRequestProcess(m_networkParams);
-    } else if (m_networkParams.httpRequestType == REQUEST_DOWNLOAD_FILE || m_networkParams.httpRequestType == REQUEST_DOWNLOAD_CLIENT) {
+    if (recved == total) {
+        m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime2();
+    }
+    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == m_networkParams.httpRequestType ||
+            m_networkParams.httpRequestType == REQUEST_DOWNLOAD_FILE || m_networkParams.httpRequestType == REQUEST_DOWNLOAD_CLIENT ||
+            m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
         emit updateRequestProcess(m_networkParams);
     }
 }
@@ -278,7 +304,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
                 delete m_pFile;
                 m_pFile = nullptr;
             }
-            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime();
+            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime2();
             emit updateRequestProcess(m_networkParams);
         } else if (m_networkParams.httpRequestType == REQUEST_GET_UPLOAD_FILES) {
             QByteArray baData = reply->readAll();
@@ -318,7 +344,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
             }
             f.close();
             qDebug() << "文件下载完毕:" << m_networkParams.saveFileDir + m_networkParams.saveFileName;
-            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime();
+            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime2();
             emit updateRequestProcess(m_networkParams);
         } else if (m_networkParams.httpRequestType == REQUEST_LOGIN) {
             QByteArray baData = reply->readAll();
@@ -345,7 +371,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
             }
             g_userName = jsonDoc["Username"].toString();
             g_userID = QString::number(jsonDoc["Id"].toInt());
-            g_loginTime = tools::GetInstance()->GetCurrentTime();
+            g_loginTime = tools::GetInstance()->GetCurrentTime2();
             emit loginSuccess();
             g_WebSocket.sendTextMessage(tools::GetInstance()->GenerateOnlineUserMessage());
             if (jsonDoc["NewClient"].toObject()["Flag"].toBool()) {
@@ -359,7 +385,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
                 m_downloadNewClientParams.paramID = tools::GetInstance()->GenerateRandomID();
                 m_downloadNewClientParams.httpRequestType = REQUEST_DOWNLOAD_CLIENT;
                 m_downloadNewClientParams.fileName = clientFileName;
-                m_downloadNewClientParams.requestTime = tools::GetInstance()->GetCurrentTime();
+                m_downloadNewClientParams.requestTime = tools::GetInstance()->GetCurrentTime2();
                 QSettings settings;
                 QString saveFileDir = settings.value(SETTING_SAVE_FILE_DIR, "C:/").toString();
                 m_downloadNewClientParams.saveFileDir = saveFileDir;
@@ -419,7 +445,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
                 delete m_pFile;
                 m_pFile = nullptr;
             }
-            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime();
+            m_networkParams.requestEndTime = tools::GetInstance()->GetCurrentTime2();
             emit updateRequestProcess(m_networkParams);
             emit uploadClientSuccess();
         }
@@ -463,3 +489,4 @@ void MyNetworkController::onInstallClient() {
     QProcess::startDetached(m_networkParams.saveFileDir + m_networkParams.saveFileName, QStringList());
     QApplication::exit(-1);
 }
+

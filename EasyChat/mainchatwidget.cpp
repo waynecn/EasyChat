@@ -107,26 +107,53 @@ void MainChatWidget::OnDownloadItem(QTableWidgetItem *item) {
 
     fileName = fileName.replace("\\", "/");
     qDebug() << "download file:" << item->text() << " save file:" << fileName;
-    NetworkParams params;
-    params.paramID = tools::GetInstance()->GenerateRandomID();
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
-    params.httpRequestType = REQUEST_DOWNLOAD_FILE;
-    params.fileName = item->text();
-    params.saveFileName = fileName.mid(fileName.lastIndexOf("/") + 1);
-    params.userID = g_userID;
-    params.userName = g_userName;
-    params.saveFileDir = fileName.mid(0, fileName.lastIndexOf("/") + 1);
 
-    saveFileDir = params.saveFileDir;
-    settings.setValue(SETTING_SAVE_FILE_DIR, saveFileDir);
+    //download file using tcp.
+    if (settings.value(SETTING_USE_TCP, false).toBool()) {
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
+        params.httpRequestType = REQUEST_DOWNLOAD_FILE_BY_TCP;
+        params.fileName = item->text();
+        params.saveFileName = fileName.mid(fileName.lastIndexOf("/") + 1);
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.saveFileDir = fileName.mid(0, fileName.lastIndexOf("/") + 1);
 
-    MyNetworkController *controller = new MyNetworkController(params);
-    connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
-    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
-    connect(controller, SIGNAL(downloadFileFailed(NetworkParams &, QString &)), this, SLOT(onDownloadFileFailed(NetworkParams &, QString &)));
-    controller->StartWork();
-    //emit upload file actions for file widget to show the uploading progress
-    emit downloadingFile(params);
+        saveFileDir = params.saveFileDir;
+        settings.setValue(SETTING_SAVE_FILE_DIR, saveFileDir);
+
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(downloadFileFailed(NetworkParams &, QString &)), this, SLOT(onDownloadFileFailed(NetworkParams &, QString &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit downloadingFile(params);
+        return;
+    } else {
+        //download file by http
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
+        params.httpRequestType = REQUEST_DOWNLOAD_FILE;
+        params.fileName = item->text();
+        params.saveFileName = fileName.mid(fileName.lastIndexOf("/") + 1);
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.saveFileDir = fileName.mid(0, fileName.lastIndexOf("/") + 1);
+
+        saveFileDir = params.saveFileDir;
+        settings.setValue(SETTING_SAVE_FILE_DIR, saveFileDir);
+
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(downloadFileFailed(NetworkParams &, QString &)), this, SLOT(onDownloadFileFailed(NetworkParams &, QString &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit downloadingFile(params);
+    }
 }
 
 void MainChatWidget::on_sendFilePushButton_clicked()
@@ -149,26 +176,48 @@ void MainChatWidget::on_sendFilePushButton_clicked()
     filePath = filePath.replace("\\", "/");
     qDebug() << "filePath:" << filePath;
 
-    NetworkParams params;
-    params.paramID = tools::GetInstance()->GenerateRandomID();
-    params.httpRequestType = REQUEST_UPLOAD_FILE;
-    params.userID = g_userID;
-    params.userName = g_userName;
-    params.toUserID = g_toUserID;
-    params.toUserName = g_toUserName;
-    params.filePath = filePath;
-    QString fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
-    params.fileName = fileName;
-    params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + fileName;
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    QSettings settings;
+    if (settings.value(SETTING_USE_TCP, false).toBool()) {
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.httpRequestType = REQUEST_UPLOAD_FILE_BY_TCP;
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.toUserID = g_toUserID;
+        params.toUserName = g_toUserName;
+        params.filePath = filePath;
+        QString fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+        params.fileName = fileName;
+        params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + fileName;
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
 
-    MyNetworkController *controller = new MyNetworkController(params);
-    connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
-    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
-    connect(controller, SIGNAL(uploadFileFailed(NetworkParams &, QString &)), this, SLOT(onUploadFileFailed(NetworkParams &, QString &)));
-    controller->StartWork();
-    //emit upload file actions for file widget to show the uploading progress
-    emit uploadingFile(params);
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit uploadingFile(params);
+    } else {
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.httpRequestType = REQUEST_UPLOAD_FILE;
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.toUserID = g_toUserID;
+        params.toUserName = g_toUserName;
+        params.filePath = filePath;
+        QString fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+        params.fileName = fileName;
+        params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + fileName;
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
+
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(uploadFileFailed(NetworkParams &, QString &)), this, SLOT(onUploadFileFailed(NetworkParams &, QString &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit uploadingFile(params);
+    }
 }
 
 void MainChatWidget::OnRequestFinished(NetworkParams &params) {
@@ -180,12 +229,12 @@ void MainChatWidget::OnRequestFinished(NetworkParams &params) {
     msgStruct.userName = g_userName;
     msgStruct.toUserID = g_toUserID;
     msgStruct.toUserName = g_toUserName;
-    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime();
+    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
     msgStruct.msg = m_pInputMessageWidget->GetInputMessage();
     if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
         msgStruct.fileName = params.fileName;
         msgStruct.fileUrl = params.fileLink;
-        m_pMessageWidget->SendMessage(msgStruct);
+        m_pMessageWidget->SendMessage2(msgStruct);
         m_pInputMessageWidget->ClearMessageContent();
     } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
         qDebug() << "下载完成，保存至：" << params.saveFileDir;
@@ -199,7 +248,7 @@ void MainChatWidget::on_fileListPushButton_clicked()
     params.httpRequestType = REQUEST_GET_UPLOAD_FILES;
     params.userID = g_userID;
     params.userName = g_userName;
-    params.requestTime = tools::GetInstance()->GetCurrentTime();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
 
     MyNetworkController *controller = new MyNetworkController(params);
     connect(controller, SIGNAL(fileListRequestFinished(QJsonArray &)), this, SIGNAL(fileListRequestFinished(QJsonArray &)));

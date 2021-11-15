@@ -26,9 +26,10 @@ public:
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
 
-    void SendMessage(MessageStruct &msg);
+    void SendMessage2(MessageStruct &msg);
 
     void uploadClient();
+    void uploadFileByTCP();
 
 public slots:
     void OnSendMessage(MessageStruct &msg);
