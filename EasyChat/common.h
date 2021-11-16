@@ -100,6 +100,7 @@ typedef struct _network_param {
     quint64          recved;         //this item is only used when processing file
     qint64          timeLeft;       //this item is only used when processing file
     qint64          speed;          //this item is only used when processing file
+    bool            msgSend;
 
     _network_param () {
         paramID = "";
@@ -123,6 +124,7 @@ typedef struct _network_param {
         recved = 0;
         timeLeft = -1;
         speed = -1;
+        msgSend = false;
     }
 
     _network_param &operator = (const _network_param &other) {
@@ -150,6 +152,7 @@ typedef struct _network_param {
         recved = other.recved;
         timeLeft = other.timeLeft;
         speed = other.speed;
+        msgSend = other.msgSend;
         return *this;
     }
 } NetworkParams, *PNetworkParams;

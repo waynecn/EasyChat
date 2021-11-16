@@ -291,6 +291,11 @@ void MyNetworkController::onRequestProgress(qint64 recved, qint64 total) {
             m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
         emit updateRequestProcess(m_networkParams);
     }
+    if (REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType && !m_networkParams.msgSend &&
+            m_networkParams.recved > 0 && m_networkParams.recved == m_networkParams.totalSize) {
+        m_networkParams.msgSend = true;
+        emit requestFinished(m_networkParams);
+    }
 }
 
 void MyNetworkController::onReplyFinished(QNetworkReply *reply) {

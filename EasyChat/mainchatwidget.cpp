@@ -193,6 +193,7 @@ void MainChatWidget::on_sendFilePushButton_clicked()
 
         MyNetworkController *controller = new MyNetworkController(params);
         connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
         controller->StartWork();
         //emit upload file actions for file widget to show the uploading progress
         emit uploadingFile(params);
@@ -238,6 +239,11 @@ void MainChatWidget::OnRequestFinished(NetworkParams &params) {
         m_pInputMessageWidget->ClearMessageContent();
     } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
         qDebug() << "下载完成，保存至：" << params.saveFileDir;
+    } else if (params.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
+        msgStruct.fileName = params.fileName;
+        msgStruct.fileUrl = params.fileLink;
+        m_pMessageWidget->SendMessage2(msgStruct);
+        m_pInputMessageWidget->ClearMessageContent();
     }
 }
 
