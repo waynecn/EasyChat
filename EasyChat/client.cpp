@@ -12,7 +12,6 @@ Client::Client()
     WSAStartup(0x202, &wsadata);
 
     m_bSocketClosed = true;
-    m_bIsStoped = false;
 }
 
 Client::Client(QObject *parent) {
@@ -34,11 +33,13 @@ bool Client::Connect() {
         qDebug() << "gethostbyname failed.";
         return false;
     }
+    qDebug() << "gethostbyname success";
 
     if ((m_iClientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         qDebug() << "failed to create client socket.";
         return false;
     }
+    qDebug() << "socket success";
     int tcpPort = settings.value(SETTING_SERVER_PORT).toInt() + 1;
     m_sockAddr.sin_family = AF_INET;
     m_sockAddr.sin_port = htons(tcpPort);
@@ -50,7 +51,6 @@ bool Client::Connect() {
     }
 
     m_bSocketClosed = false;
-    m_bIsStoped = false;
 
     qDebug() << "client connect success.";
     return true;
@@ -197,12 +197,14 @@ bool Client::SendFileWithParams(NetworkParams &params) {
 }
 
 bool Client::DownloadFileWithParams(NetworkParams &params) {
-    char *chBuff = new char[BUFF_SIZE];
+    qDebug() << __FUNCTION__;
+    char chBuff[BUFF_SIZE];
     memset(chBuff, 0, BUFF_SIZE);
 
     QString s = QString("download|%1|%2|donotremove").arg(params.fileName).arg(params.userName);
     strcpy(chBuff, s.toStdString().c_str());
     send(m_iClientSocket, chBuff, strlen(chBuff) + 1, 0);
+    qDebug()<<"send download info success";
 
     //receive file name and file size
     int recvLen = recv(m_iClientSocket, chBuff, BUFF_SIZE, 0);
@@ -210,10 +212,11 @@ bool Client::DownloadFileWithParams(NetworkParams &params) {
         qDebug() << "recv data from tcp server failed.";
         closesocket(m_iClientSocket);
         m_bSocketClosed = true;
-        delete []chBuff;
-        chBuff = nullptr;
+//        delete []chBuff;
+//        chBuff = nullptr;
         return false;
     }
+    qDebug() << "recv file size and filename success";
 
     QString fileInfoData(chBuff);
     QStringList fileInfoArr = fileInfoData.split("|");
@@ -222,8 +225,8 @@ bool Client::DownloadFileWithParams(NetworkParams &params) {
         qDebug() << "recv data was wrong." << fileInfoData;
         closesocket(m_iClientSocket);
         m_bSocketClosed = true;
-        delete []chBuff;
-        chBuff = nullptr;
+//        delete []chBuff;
+//        chBuff = nullptr;
         return false;
     }
     QString fileName = fileInfoArr[0];
@@ -235,8 +238,8 @@ bool Client::DownloadFileWithParams(NetworkParams &params) {
         qDebug() << "failed to save file:" << params.saveFileDir + params.saveFileName;
         closesocket(m_iClientSocket);
         m_bSocketClosed = true;
-        delete []chBuff;
-        chBuff = nullptr;
+//        delete []chBuff;
+//        chBuff = nullptr;
         return false;
     }
     params.totalSize = fileSize;
@@ -266,8 +269,8 @@ bool Client::DownloadFileWithParams(NetworkParams &params) {
     f.close();
     closesocket(m_iClientSocket);
     m_bSocketClosed = true;
-    delete []chBuff;
-    chBuff = nullptr;
+//    delete []chBuff;
+//    chBuff = nullptr;
     qDebug() << "download file success:" << params.fileName << " saved file:" << params.saveFileDir + params.saveFileName;
     return true;
 }

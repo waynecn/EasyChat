@@ -12,7 +12,7 @@ class ClientThread : public QThread
 
 public:
     ClientThread(QObject *parent = nullptr);
-    ClientThread(QString fullFilePath, QString userName, QObject *parent = nullptr);
+    //ClientThread(QString fullFilePath, QString userName, QObject *parent = nullptr);
     ClientThread(NetworkParams &params, QObject*parent = nullptr);
     ~ClientThread();
 

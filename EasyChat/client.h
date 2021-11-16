@@ -4,6 +4,7 @@
 #include "common.h"
 
 #include <winsock2.h>
+#include <QObject>
 
 class Client
 {
@@ -19,11 +20,8 @@ public:
     bool SendFileWithParams(NetworkParams &params);
     bool DownloadFileWithParams(NetworkParams &params);
 
-    bool    m_bIsStoped;
-
 private:
     uint     m_iClientSocket;
-    //char    m_chBuff[BUFF_SIZE];
     bool    m_bSocketClosed;
 
     struct sockaddr_in m_sockAddr;

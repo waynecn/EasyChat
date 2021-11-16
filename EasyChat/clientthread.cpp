@@ -10,13 +10,13 @@ ClientThread::ClientThread(QObject *parent) :
 
 }
 
-ClientThread::ClientThread(QString fullFilePath, QString userName, QObject *parent) :
-    QThread (parent),
-    m_pClient(nullptr)
-{
-    m_strFullFilePath = fullFilePath;
-    m_strUserName = userName;
-}
+//ClientThread::ClientThread(QString fullFilePath, QString userName, QObject *parent) :
+//    QThread (parent),
+//    m_pClient(nullptr)
+//{
+//    m_strFullFilePath = fullFilePath;
+//    m_strUserName = userName;
+//}
 
 ClientThread::ClientThread(NetworkParams &params, QObject *parent) :
     QThread (parent),
@@ -40,14 +40,17 @@ void ClientThread::run() {
     }
     if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
         if (m_pClient->Connect()) {
+            qDebug() << __FUNCTION__ << " ready send file with params";
             m_pClient->SendFileWithParams(m_networkParams);
         }
     } else if (REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
         if (m_pClient->Connect()) {
+            qDebug() << __FUNCTION__ << " ready download file with params";
             m_pClient->DownloadFileWithParams(m_networkParams);
         }
     }
 
+    qDebug() << "client thread delete later";
     this->deleteLater();
 }
 

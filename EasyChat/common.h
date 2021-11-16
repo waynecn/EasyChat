@@ -4,7 +4,7 @@
 #include <QString>
 #include <QtWebSockets/QWebSocket>
 
-const int               BUFF_SIZE = 1024 * 1024;
+const int               BUFF_SIZE = 1024 * 256;
 
 const QString SETTING_SERVER_HOST_LIST = "SETTING_SERVER_HOST_LIST";
 const QString SETTING_CURRENT_SERVER_HOST = "SETTING_CURRENT_SERVER_HOST";
@@ -97,7 +97,7 @@ typedef struct _network_param {
 
     int             itemRow;        //this param row index in upload or download tablewidget
     quint64          totalSize;      //this item is only used when processing file
-    qint64          recved;         //this item is only used when processing file
+    quint64          recved;         //this item is only used when processing file
     qint64          timeLeft;       //this item is only used when processing file
     qint64          speed;          //this item is only used when processing file
 
@@ -120,7 +120,7 @@ typedef struct _network_param {
 
         itemRow = -1;
         totalSize = 0;
-        recved = -1;
+        recved = 0;
         timeLeft = -1;
         speed = -1;
     }
