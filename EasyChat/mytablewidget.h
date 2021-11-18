@@ -18,6 +18,7 @@ public:
 
 private slots:
     void onOpenFileDir();
+    void onDeleteFile();
 
 private:
     QMenu   *m_pMenu;

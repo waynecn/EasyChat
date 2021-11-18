@@ -102,6 +102,7 @@ void FileListTableWidget::OnFileList(QJsonArray &files) {
         QString uploadUser = obj["UploadUser"].toObject()["Valid"].toBool() ? obj["UploadUser"].toObject()["String"].toString() : "未知";
         this->setItem(i, 2, new QTableWidgetItem(uploadUser));
         QString createTime = obj["CreateTime"].toObject()["Valid"].toBool() ? obj["CreateTime"].toObject()["Time"].toString() : "未知";
+        createTime = createTime.replace("T", " ").replace("Z", "");
         this->setItem(i, 3, new QTableWidgetItem(createTime));
         this->setItem(i, 4, new QTableWidgetItem("下载"));
     }
