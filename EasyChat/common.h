@@ -16,7 +16,7 @@ const QString SETTING_REMEMBER_PASSWORD = "SETTING_REMEMBER_PASSWORD";
 const QString SETTING_SAVE_FILE_DIR = "SETTING_SAVE_FILE_DIR";
 const QString SETTING_USE_TCP = "SETTING_USE_TCP";
 
-static QString APPLICATION_VERSION = "1.1.8";
+static QString APPLICATION_VERSION = "1.1.9";
 
 extern QString g_userID;        //current logined user info
 extern QString g_userName;      //current logined user info
