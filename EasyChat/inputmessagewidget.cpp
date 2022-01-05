@@ -10,6 +10,8 @@ InputMessageWidget::InputMessageWidget(QWidget *parent) :
     ui->setupUi(this);
 
     ui->sendMessagePushButton->setStyleSheet(SEND_MESSAGE_BUTTON_STYLE_SHEET);
+
+    connect(ui->inputMessageTextEdit, SIGNAL(uploadFile(QString &)), this, SIGNAL(uploadFile(QString &)));
 }
 
 InputMessageWidget::~InputMessageWidget()

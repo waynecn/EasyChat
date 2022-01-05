@@ -29,6 +29,7 @@ public:
 
 public slots:
     void OnDownloadItem(QTableWidgetItem *item);
+    void UploadFile(QString &filePath);
 
 private slots:
     void on_sendFilePushButton_clicked();

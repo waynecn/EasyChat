@@ -41,6 +41,7 @@ SOURCES += \
         monitor.cpp \
         mynetworkcontroller.cpp \
         mytablewidget.cpp \
+        mytextedit.cpp \
         registerdlg.cpp \
         settingdlg.cpp \
         tools.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
         monitor.h \
         mynetworkcontroller.h \
         mytablewidget.h \
+        mytextedit.h \
         registerdlg.h \
         settingdlg.h \
         tools.h \

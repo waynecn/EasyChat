@@ -23,7 +23,7 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTextEdit" name="inputMessageTextEdit"/>
+      <widget class="MyTextEdit" name="inputMessageTextEdit"/>
      </item>
      <item>
       <widget class="QPushButton" name="sendMessagePushButton">
@@ -48,6 +48,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>mytextedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
