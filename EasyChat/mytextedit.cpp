@@ -24,9 +24,9 @@ void MyTextEdit::insertFromMimeData(const QMimeData *source) {
 
             if (QFile::exists(file)) {
                 emit uploadFile(file);
-                return;
             }
         }
+        return;
     }
     QTextEdit::insertFromMimeData(source);
 }
