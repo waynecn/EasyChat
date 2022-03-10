@@ -50,9 +50,15 @@ MessageWidget::MessageWidget(QWidget *parent) :
     }
 
     connect(&g_WebSocket, SIGNAL(textMessageReceived(const QString &)), this, SLOT(OnWebSocketMsgReceived(const QString &)));
+    connect(&g_WebSocket, SIGNAL(pong(quint64, const QByteArray &)), this, SLOT(onPongMessage(quint64, const QByteArray &)));
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(OnTabCloseRequested(int)));
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
     connect(m_pTextBrowser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
+
+    m_Timer = new QTimer(this);
+    connect(m_Timer, SIGNAL(timeout()), this, SLOT(onTimerOut()));
+    m_Timer->start(10 * 1000);    //10 seconds
+    m_PingOvertimeCount = 0;
 }
 
 MessageWidget::~MessageWidget()
@@ -61,6 +67,8 @@ MessageWidget::~MessageWidget()
         delete m_pTextBrowser;
         m_pTextBrowser = nullptr;
     }
+    delete m_Timer;
+    m_Timer = nullptr;
     delete ui;
 }
 
@@ -512,4 +520,23 @@ void MessageWidget::uploadFileByTCP() {
     //直接使用线程调用client发送文件，但是这样进度没法在文件列表展示进度
 //    ClientThread *thread = new ClientThread(filePath, g_userName);
 //    thread->start();
+}
+
+void MessageWidget::onTimerOut() {
+    g_WebSocket.ping();
+    m_Timer->start(10 * 1000);
+    qint64 seconds = m_ServerPongTime.secsTo(QDateTime::currentDateTime());
+    if (abs(seconds) > 11) {
+        qDebug() << "server may not available at:" << tools::GetInstance()->GetCurrentTime2();
+        if (m_PingOvertimeCount > 3) {
+            g_WebSocket.close();
+            m_PingOvertimeCount = 0;
+            return;
+        }
+        m_PingOvertimeCount++;
+    }
+}
+
+void MessageWidget::onPongMessage(quint64 elapsedTime, const QByteArray &payload) {
+    m_ServerPongTime = QDateTime::currentDateTime();
 }

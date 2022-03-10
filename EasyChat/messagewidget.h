@@ -10,6 +10,8 @@
 #include <QVector>
 #include <QTableWidgetItem>
 #include <QKeyEvent>
+#include <QDateTime>
+#include <QTimer>
 
 namespace Ui {
 class MessageWidget;
@@ -43,6 +45,9 @@ private slots:
     void onUploadClientFailed(NetworkParams &params, QString &msg);
     void onAnchorClicked(const QUrl &url);
 
+    void onTimerOut();
+    void onPongMessage(quint64 elapsedTime, const QByteArray &payload);
+
 private:
     Ui::MessageWidget *ui;
     QString m_strContentTemplateWithoutLink;
@@ -56,6 +61,9 @@ private:
     QVector<QString> m_vecTabWidgetUserIDs;
     bool m_bCtrlPressed;
     QFile *m_pFile;
+    QTimer *m_Timer;
+    QDateTime m_ServerPongTime;
+    int m_PingOvertimeCount;
 
 signals:
     void downloadImage(QString strUrl, QString saveDir);
