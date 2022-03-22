@@ -355,6 +355,7 @@ void MessageWidget::OnItemDoubleClicked(QTableWidgetItem *item) {
 
 void MessageWidget::onCurrentChanged(int index) {
     if (index < 1) {
+        g_toUserID = "";
         return;
     }
     g_toUserID = m_vecTabWidgetUserIDs[index - 1];

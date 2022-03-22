@@ -69,7 +69,7 @@ void MyNetworkController::uploadFile() {
     m_pFile = new QFile(m_networkParams.filePath);
     m_pFile->open(QIODevice::ReadOnly);
 
-    QString requestUrl = "http://" + g_serverHost + ":" + g_serverPort + "/uploads2";
+    QString requestUrl = "http://" + g_serverHost + ":" + g_serverPort + "/uploads3";
     QHttpMultiPart *pMultiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart filePart;
@@ -81,6 +81,8 @@ void MyNetworkController::uploadFile() {
     QUrl url(requestUrl);
     QNetworkRequest req(url);
     req.setRawHeader("UserName", g_userName.toUtf8());
+    req.setRawHeader("UserId", g_userID.toUtf8());
+    req.setRawHeader("ToUserId", g_toUserID.toUtf8());
     QNetworkReply *reply = pNetworkAccessManager->post(req, pMultiPart);
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(upLoadError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(onRequestProgress(qint64, qint64)));
@@ -89,7 +91,7 @@ void MyNetworkController::uploadFile() {
 }
 
 void MyNetworkController::getUploadFiles() {
-    QString fileListUrl = "http://" + g_serverHost + ":" + g_serverPort + "/uploadfiles2";
+    QString fileListUrl = "http://" + g_serverHost + ":" + g_serverPort + "/uploadfiles3?userId=" + m_networkParams.userID;
     QUrl url(fileListUrl);
     QNetworkRequest req(url);
     req.setRawHeader("token", "20200101");
@@ -139,14 +141,14 @@ void MyNetworkController::registerUser() {
 }
 
 void MyNetworkController::deleteFile() {
-    QString deleteFileUrl = "http://" + g_serverHost + ":" + g_serverPort + "/delfile2";
+    QString deleteFileUrl = "http://" + g_serverHost + ":" + g_serverPort + "/delfile3";
 
     QUrl url(deleteFileUrl);
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("token", "20200101");
 
-    QString strData = "{\"fileName\":\"" + m_networkParams.fileName + "\",\"userName\":\"" + m_networkParams.userName + "\"}";
+    QString strData = "{\"fileName\":\"" + m_networkParams.fileName + "\",\"userName\":\"" + m_networkParams.userName + "\",\"userId\":" + m_networkParams.userID + "}";
     QNetworkAccessManager *pNetworkAccessManager = new QNetworkAccessManager();
     pNetworkAccessManager->post(req, strData.toLocal8Bit());
     connect(pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onReplyFinished(QNetworkReply*)));
@@ -327,7 +329,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
             }
             bool bRet = jsonDoc["Success"].toBool();
             if (!bRet) {
-                QString msg = "解析响应数据发生错误";
+                QString msg = jsonDoc["Msg"].toString();
                 QMessageBox box;
                 box.setWindowTitle("EasyChat");
                 box.setText(msg);

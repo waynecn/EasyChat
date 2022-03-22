@@ -17,6 +17,8 @@ bool MyTextEdit::canInsertFromMimeData(const QMimeData *source) {
 }
 
 void MyTextEdit::insertFromMimeData(const QMimeData *source) {
+    //当拷贝的文字内容中包含 a.b这种，sources->hasUrls为true 导致粘贴失效
+    bool enabled = false;
     if (source->hasUrls()) {
         QList<QUrl> urls = source->urls();
         for (QUrl url : urls) {
@@ -24,9 +26,11 @@ void MyTextEdit::insertFromMimeData(const QMimeData *source) {
 
             if (QFile::exists(file)) {
                 emit uploadFile(file);
+                enabled = true;
             }
         }
-        return;
+        if (enabled)
+            return;
     }
     QTextEdit::insertFromMimeData(source);
 }

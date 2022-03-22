@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pFileWidget(nullptr),
     m_pFileListTableWidget(nullptr),
     m_bCtrlPressed(false),
-    m_bFirstRun(true)
+    m_bFirstRun(false)
 {
     Qt::WindowFlags flags= this->windowFlags();
     setWindowFlags(flags&~Qt::WindowContextHelpButtonHint);
@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pMainChatWidget, SIGNAL(uploadingClient(NetworkParams &)), m_pFileWidget, SLOT(OnProcessFile(NetworkParams &)));
     connect(m_pFileListTableWidget, SIGNAL(downloadItem(QTableWidgetItem *)), m_pMainChatWidget, SLOT(OnDownloadItem(QTableWidgetItem *)));
     connect(m_pMainTabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
-    m_pMainChatWidget->QueryFileList();
 }
 
 MainWindow::~MainWindow()
