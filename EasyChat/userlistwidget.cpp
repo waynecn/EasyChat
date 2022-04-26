@@ -23,10 +23,13 @@ UserListWidget::~UserListWidget()
 
 void UserListWidget::OnOnelineUsersMessage(QMap<QString, UserInfo> &onlineUsersMap) {
     QList<QString> keys = onlineUsersMap.keys();
-    ui->userListTableWidget->setRowCount(keys.size());
+    ui->userListTableWidget->setRowCount(keys.size() + 1);
+    QTableWidgetItem *item = new QTableWidgetItem(g_userName);
+    item->setToolTip(g_userID);
+    ui->userListTableWidget->setItem(0, 0, item);
     for (int i = 0; i < keys.size(); ++i) {
         QTableWidgetItem *userNameItem = new QTableWidgetItem(onlineUsersMap[keys[i]].userName);
         userNameItem->setToolTip(onlineUsersMap[keys[i]].userID);
-        ui->userListTableWidget->setItem(i, 0, userNameItem);
+        ui->userListTableWidget->setItem(i + 1, 0, userNameItem);
     }
 }

@@ -32,6 +32,7 @@ public:
 
     void uploadClient();
     void uploadFileByTCP();
+    void uploadFileToPersonalSpace();
 
 public slots:
     void OnSendMessage(MessageStruct &msg);
@@ -58,6 +59,7 @@ private:
     QVector<MessageStruct>    m_vecMsgInfos;
     QMap<QString, UserInfo>   m_onlineUserMap;
     QTextBrowser *m_pTextBrowser;
+    QTextBrowser *m_PersonalTextBrowser;
     QVector<QString> m_vecTabWidgetUserIDs;
     bool m_bCtrlPressed;
     QFile *m_pFile;

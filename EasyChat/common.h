@@ -16,7 +16,7 @@ const QString SETTING_REMEMBER_PASSWORD = "SETTING_REMEMBER_PASSWORD";
 const QString SETTING_SAVE_FILE_DIR = "SETTING_SAVE_FILE_DIR";
 const QString SETTING_USE_TCP = "SETTING_USE_TCP";
 
-static QString APPLICATION_VERSION = "1.2.3";
+static QString APPLICATION_VERSION = "1.2.4";
 
 extern QString g_userID;        //current logined user info
 extern QString g_userName;      //current logined user info
@@ -26,6 +26,7 @@ extern QString g_toUserID;      //if current chat widget tab index is not zero, 
 extern QString g_toUserName;    //if current chat widget tab index is not zero, then it cann't be empty
 extern QString g_serverHost;
 extern QString g_serverPort;
+extern QString g_Token;
 
 extern QWebSocket g_WebSocket;
 
@@ -67,6 +68,7 @@ typedef struct _messageStruct{
     QString imgUrl;
     QString toUserID;
     QString toUserName;
+    bool uploadToPersonalSpace;
 } MessageStruct, *PMessageStruct;
 
 typedef struct _user_info {
@@ -101,6 +103,7 @@ typedef struct _network_param {
     qint64          timeLeft;       //this item is only used when processing file
     qint64          speed;          //this item is only used when processing file
     bool            msgSend;
+    bool            uploadToPersonalSpace;
 
     _network_param () {
         paramID = "";
@@ -125,6 +128,7 @@ typedef struct _network_param {
         timeLeft = -1;
         speed = -1;
         msgSend = false;
+        uploadToPersonalSpace = false;
     }
 
     _network_param &operator = (const _network_param &other) {
@@ -153,6 +157,7 @@ typedef struct _network_param {
         timeLeft = other.timeLeft;
         speed = other.speed;
         msgSend = other.msgSend;
+        uploadToPersonalSpace = other.uploadToPersonalSpace;
         return *this;
     }
 } NetworkParams, *PNetworkParams;

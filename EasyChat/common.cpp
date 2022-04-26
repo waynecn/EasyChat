@@ -10,6 +10,7 @@ QString g_toUserID;
 QString g_toUserName;
 QString g_serverHost;
 QString g_serverPort;
+QString g_Token;
 
 QWebSocket g_WebSocket;
 

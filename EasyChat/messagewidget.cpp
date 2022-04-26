@@ -26,14 +26,19 @@ MessageWidget::MessageWidget(QWidget *parent) :
     m_pTextBrowser = new QTextBrowser();
     m_pTextBrowser->setOpenExternalLinks(false);
     m_pTextBrowser->setOpenLinks(false);
+    m_PersonalTextBrowser = new QTextBrowser();
+    m_PersonalTextBrowser->setOpenExternalLinks(false);
+    m_PersonalTextBrowser->setOpenLinks(false);
     int tabCount = ui->tabWidget->count();
     for (int i = 0; i < tabCount; ++i) {
         ui->tabWidget->removeTab(0);
     }
     ui->tabWidget->setStyleSheet(TAB_BAR_STYLE_SHEET);
-    ui->tabWidget->addTab(m_pTextBrowser, "MainChat");
+    ui->tabWidget->addTab(m_pTextBrowser, "首页");
+    ui->tabWidget->addTab(m_PersonalTextBrowser, "个人空间");
     ui->tabWidget->setTabsClosable(true);
     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
+    ui->tabWidget->tabBar()->setTabButton(1, QTabBar::RightSide, nullptr);
 
     m_strContentTemplateWithoutLink = "<div><a style=\"color:blue\">%1:</a><a style=\"color:gray\">(%2)</a>\
         <br />&nbsp;&nbsp;&nbsp;&nbsp;<a>%3</a></div>";
@@ -54,6 +59,7 @@ MessageWidget::MessageWidget(QWidget *parent) :
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(OnTabCloseRequested(int)));
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentChanged(int)));
     connect(m_pTextBrowser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
+    connect(m_PersonalTextBrowser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
 
     m_Timer = new QTimer(this);
     connect(m_Timer, SIGNAL(timeout()), this, SLOT(onTimerOut()));
@@ -66,6 +72,10 @@ MessageWidget::~MessageWidget()
     if (m_pTextBrowser != nullptr) {
         delete m_pTextBrowser;
         m_pTextBrowser = nullptr;
+    }
+    if (m_PersonalTextBrowser != nullptr) {
+        delete m_PersonalTextBrowser;
+        m_PersonalTextBrowser = nullptr;
     }
     delete m_Timer;
     m_Timer = nullptr;
@@ -87,6 +97,10 @@ void MessageWidget::keyPressEvent(QKeyEvent *e) {
 
     if (m_bCtrlPressed && e->key() == Qt::Key_T) {
         uploadFileByTCP();
+    }
+
+    if (m_bCtrlPressed && e->key() == Qt::Key_P) {
+        uploadFileToPersonalSpace();
     }
 
     e->accept();
@@ -116,9 +130,18 @@ void MessageWidget::OnSendMessage(MessageStruct &msg) {
         }
         m_pTextBrowser->setHtml("<html>" + m_messageMap["main"] + "</html>");
         m_pTextBrowser->moveCursor(QTextCursor::End);
+    } else if (currentIndex == 1) {
+        //上传到个人空间
+        if (msg.fileUrl.isEmpty()) {
+            m_messageMap["personal"] += m_strContentTemplateWithoutLink.arg(msg.userName).arg(msg.sendTime).arg(textMsg);
+        } else {
+            m_messageMap["personal"] += m_strContentTemplateWithLink.arg(msg.userName).arg(msg.sendTime).arg(textMsg).arg(msg.fileUrl).arg(msg.fileName);
+        }
+        m_PersonalTextBrowser->setHtml("<html>" + m_messageMap["personal"] + "</html>");
+        m_PersonalTextBrowser->moveCursor(QTextCursor::End);
     } else {
         QTextBrowser *browser = (QTextBrowser *)ui->tabWidget->currentWidget();
-        QString currentUserID = m_vecTabWidgetUserIDs[currentIndex - 1];
+        QString currentUserID = m_vecTabWidgetUserIDs[currentIndex - 2];
         msg.toUserID = currentUserID;
         if (msg.fileUrl.isEmpty()) {
             m_messageMap[currentUserID] += m_strContentTemplateWithoutLink.arg(msg.userName).arg(msg.sendTime).arg(textMsg);
@@ -129,11 +152,13 @@ void MessageWidget::OnSendMessage(MessageStruct &msg) {
         browser->moveCursor(QTextCursor::End);
         connect(browser, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(onAnchorClicked(const QUrl &)));
     }
-    QByteArray byteMsg = tools::GetInstance()->GenerateWebsocketMsg(msg);
-    qint64 ret = g_WebSocket.sendTextMessage(byteMsg);
-    if (ret != byteMsg.size()) {
-        qDebug() << "byte msg size:" << byteMsg.size() << " send msg size:" << ret;
-        qDebug() << "websocket message send failed, message is:" << byteMsg;
+    if (1 != currentIndex) {
+        QByteArray byteMsg = tools::GetInstance()->GenerateWebsocketMsg(msg);
+        qint64 ret = g_WebSocket.sendTextMessage(byteMsg);
+        if (ret != byteMsg.size()) {
+            qDebug() << "byte msg size:" << byteMsg.size() << " send msg size:" << ret;
+            qDebug() << "websocket message send failed, message is:" << byteMsg;
+        }
     }
 }
 
@@ -316,11 +341,16 @@ void MessageWidget::OnWebSocketMsgReceived(const QString &msg) {
 }
 
 void MessageWidget::OnTabCloseRequested(int index) {
-    m_vecTabWidgetUserIDs.removeAt(index - 1);
+    QString userId = m_vecTabWidgetUserIDs[index - 2];
+    m_messageMap[userId].clear();
+    m_vecTabWidgetUserIDs.removeAt(index - 2);
     ui->tabWidget->removeTab(index);
 }
 
 void MessageWidget::OnItemDoubleClicked(QTableWidgetItem *item) {
+    if (item->row() == 0) {
+        return;
+    }
     QString userID = item->toolTip();
     if (userID.isEmpty()) {
         return;
@@ -354,11 +384,11 @@ void MessageWidget::OnItemDoubleClicked(QTableWidgetItem *item) {
 }
 
 void MessageWidget::onCurrentChanged(int index) {
-    if (index < 1) {
+    if (index < 2) {
         g_toUserID = "";
         return;
     }
-    g_toUserID = m_vecTabWidgetUserIDs[index - 1];
+    g_toUserID = m_vecTabWidgetUserIDs[index - 2];
     if (!g_toUserID.isEmpty()) {
         g_toUserName = m_onlineUserMap[g_toUserID].userName;
     }
@@ -521,6 +551,47 @@ void MessageWidget::uploadFileByTCP() {
     //直接使用线程调用client发送文件，但是这样进度没法在文件列表展示进度
 //    ClientThread *thread = new ClientThread(filePath, g_userName);
 //    thread->start();
+}
+
+void MessageWidget::uploadFileToPersonalSpace() {
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setViewMode(QFileDialog::Detail);
+    QString filePath;
+    if (dialog.exec()) {
+        QStringList files = dialog.selectedFiles();
+        if (files.size() > 0) {
+            filePath = files[0];
+        }
+    }
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    filePath = filePath.replace("\\", "/");
+    qDebug() << "filePath:" << filePath;
+
+    NetworkParams params;
+    params.paramID = tools::GetInstance()->GenerateRandomID();
+    params.httpRequestType = REQUEST_UPLOAD_FILE;
+    params.paramID = tools::GetInstance()->GenerateRandomID();
+    params.requestTime = tools::GetInstance()->GetCurrentTime2();
+    params.userID = g_userID;
+    params.userName = g_userName;
+    params.fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+    params.filePath = filePath;
+    params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + params.fileName;
+    params.toUserID = g_userID;
+    params.toUserName = g_userName;
+    params.uploadToPersonalSpace = true;
+    MyNetworkController *controller = new MyNetworkController(params);
+    connect(controller, SIGNAL(uploadClientSuccess()), this, SLOT(onUploadClientSuccess()));
+    connect(controller, SIGNAL(uploadClientFailed(NetworkParams &, QString &)), this, SLOT(onUploadClientFailed(NetworkParams &, QString &)));
+    connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+    controller->StartWork();
+    emit uploadingClient(params);
+    return;
 }
 
 void MessageWidget::onTimerOut() {

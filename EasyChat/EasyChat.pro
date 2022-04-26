@@ -28,7 +28,6 @@ SOURCES += \
         client.cpp \
         clientthread.cpp \
         common.cpp \
-        controller.cpp \
         filelisttablewidget.cpp \
         filewidget.cpp \
         inputmessagewidget.cpp \
@@ -51,7 +50,6 @@ HEADERS += \
         client.h \
         clientthread.h \
         common.h \
-        controller.h \
         filelisttablewidget.h \
         filewidget.h \
         inputmessagewidget.h \

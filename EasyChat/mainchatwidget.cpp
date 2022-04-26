@@ -289,10 +289,11 @@ void MainChatWidget::OnRequestFinished(NetworkParams &params) {
     MessageStruct msgStruct;
     msgStruct.userID = g_userID;
     msgStruct.userName = g_userName;
-    msgStruct.toUserID = g_toUserID;
-    msgStruct.toUserName = g_toUserName;
+    msgStruct.toUserID = params.toUserID;
+    msgStruct.toUserName = params.toUserName;
     msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
     msgStruct.msg = m_pInputMessageWidget->GetInputMessage();
+    msgStruct.uploadToPersonalSpace = params.uploadToPersonalSpace;
     if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
         msgStruct.fileName = params.fileName;
         msgStruct.fileUrl = params.fileLink;

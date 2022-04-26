@@ -83,6 +83,7 @@ void MyNetworkController::uploadFile() {
     req.setRawHeader("UserName", g_userName.toUtf8());
     req.setRawHeader("UserId", g_userID.toUtf8());
     req.setRawHeader("ToUserId", g_toUserID.toUtf8());
+    req.setRawHeader("Authorization", g_Token.toUtf8());
     QNetworkReply *reply = pNetworkAccessManager->post(req, pMultiPart);
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(upLoadError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(uploadProgress(qint64, qint64)), this, SLOT(onRequestProgress(qint64, qint64)));
@@ -95,6 +96,7 @@ void MyNetworkController::getUploadFiles() {
     QUrl url(fileListUrl);
     QNetworkRequest req(url);
     req.setRawHeader("token", "20200101");
+    req.setRawHeader("Authorization", g_Token.toUtf8());
     QNetworkAccessManager *pNetworkAccessManager = new QNetworkAccessManager();
     pNetworkAccessManager->get(req);
     connect(pNetworkAccessManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(onReplyFinished(QNetworkReply*)));
@@ -147,6 +149,7 @@ void MyNetworkController::deleteFile() {
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     req.setRawHeader("token", "20200101");
+    req.setRawHeader("Authorization", g_Token.toUtf8());
 
     QString strData = "{\"fileName\":\"" + m_networkParams.fileName + "\",\"userName\":\"" + m_networkParams.userName + "\",\"userId\":" + m_networkParams.userID + "}";
     QNetworkAccessManager *pNetworkAccessManager = new QNetworkAccessManager();
@@ -231,6 +234,7 @@ void MyNetworkController::uploadClient() {
     QUrl url(uploadUrl);
     QNetworkRequest req(url);
     req.setRawHeader("UserName", g_userName.toUtf8());
+    req.setRawHeader("Authorization", g_Token.toUtf8());
     QNetworkAccessManager *pNetworkAccessManager = new QNetworkAccessManager();
     QNetworkReply *reply = pNetworkAccessManager->post(req, pMultiPart);
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(upLoadError(QNetworkReply::NetworkError)));
@@ -378,6 +382,7 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
             }
             g_userName = jsonDoc["Username"].toString();
             g_userID = QString::number(jsonDoc["Id"].toInt());
+            g_Token = jsonDoc["Token"].toString();
             g_loginTime = tools::GetInstance()->GetCurrentTime2();
             emit loginSuccess();
             g_WebSocket.sendTextMessage(tools::GetInstance()->GenerateOnlineUserMessage());

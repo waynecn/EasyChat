@@ -48,6 +48,8 @@ void ClientThread::run() {
             qDebug() << __FUNCTION__ << " ready download file with params";
             m_pClient->DownloadFileWithParams(m_networkParams);
         }
+    } else if (REQUEST_GET_UPLOAD_FILES == m_networkParams.httpRequestType) {
+
     }
 
     qDebug() << "client thread delete later";
