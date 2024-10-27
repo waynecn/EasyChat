@@ -393,39 +393,3 @@ void MainChatWidget::onUploadFileFailed(NetworkParams &params, QString &msg) {
 void MainChatWidget::onDownloadFileFailed(NetworkParams &params, QString &msg) {
     QMessageBox::warning(nullptr, "WARN", "下载文件:" + params.fileName + " 失败:" + msg);
 }
-
-//void MainChatWidget::OnTmpRequestFinished(NetworkParams &params, QString &fullName) {
-//    if (params.httpRequestType == REQUEST_GET_UPLOAD_FILES) {
-//        return;
-//    }
-//    MessageStruct msgStruct;
-//    msgStruct.userID = g_userID;
-//    msgStruct.userName = g_userName;
-//    msgStruct.toUserID = params.toUserID;
-//    msgStruct.toUserName = params.toUserName;
-//    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
-//    msgStruct.msg = m_pInputMessageWidget->GetInputMessage();
-//    msgStruct.uploadToPersonalSpace = params.uploadToPersonalSpace;
-//    if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
-//        msgStruct.fileName = params.fileName;
-//        msgStruct.fileUrl = params.fileLink;
-//        m_pMessageWidget->SendMessage2(msgStruct);
-//        m_pInputMessageWidget->ClearMessageContent();
-//    } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
-//        qDebug() << "下载完成，保存至：" << params.saveFileDir;
-//    } else if (params.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
-//        msgStruct.fileName = params.fileName;
-//        msgStruct.fileUrl = params.fileLink;
-//        m_pMessageWidget->SendMessage2(msgStruct);
-//        m_pInputMessageWidget->ClearMessageContent();
-//    }
-//    QFile f(fullName);
-//    if (!f.remove()) {
-//        QMessageBox::warning(nullptr, "WARN", "临时文件:" + fullName + "删除失败");
-//    }
-//    qDebug() << "tmp file:" << fullName << " removed";
-//}
-//
-//void MainChatWidget::onUploadTmpFileFailed(NetworkParams &params, QString &msg) {
-//    QMessageBox::warning(nullptr, "WARN", "上传文件:" + params.fileName + " 失败:" + msg);
-//}
