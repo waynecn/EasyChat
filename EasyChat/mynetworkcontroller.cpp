@@ -43,7 +43,8 @@ void MyNetworkController::StartWork() {
         g_serverHost = settings.value(SETTING_CURRENT_SERVER_HOST).toString();
         g_serverPort = settings.value(SETTING_SERVER_PORT).toString();
     }
-    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE) {
+    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE
+            || m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE) {
         uploadFile();
     } else if (m_networkParams.httpRequestType == REQUEST_GET_UPLOAD_FILES) {
         getUploadFiles();
@@ -57,7 +58,8 @@ void MyNetworkController::StartWork() {
         deleteFile();
     } else if (REQUEST_UPLOAD_CLIENT == m_networkParams.httpRequestType) {
         uploadClient();
-    } else if (REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
+    } else if (REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType
+               || REQUEST_UPLOAD_TMPFILE_BY_TCP == m_networkParams.httpRequestType) {
         uploadFileByTCP();
     } else if (REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
         downloadFileByTCP();
@@ -294,10 +296,13 @@ void MyNetworkController::onRequestProgress(qint64 recved, qint64 total) {
     }
     if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE || REQUEST_UPLOAD_CLIENT == m_networkParams.httpRequestType ||
             m_networkParams.httpRequestType == REQUEST_DOWNLOAD_FILE || m_networkParams.httpRequestType == REQUEST_DOWNLOAD_CLIENT ||
-            m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType) {
+            m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || REQUEST_DOWNLOAD_FILE_BY_TCP == m_networkParams.httpRequestType
+            || m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE
+            || m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE_BY_TCP) {
         emit updateRequestProcess(m_networkParams);
     }
-    if (REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType && !m_networkParams.msgSend &&
+    if ((REQUEST_UPLOAD_FILE_BY_TCP == m_networkParams.httpRequestType
+         || REQUEST_UPLOAD_TMPFILE_BY_TCP == m_networkParams.httpRequestType) && !m_networkParams.msgSend &&
             m_networkParams.recved > 0 && m_networkParams.recved == m_networkParams.totalSize) {
         m_networkParams.msgSend = true;
         emit requestFinished(m_networkParams);
@@ -308,8 +313,15 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
     qDebug() << "reply finished:" << m_networkParams.httpRequestType << " " << m_networkParams.fileName;
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (reply->error() == QNetworkReply::NoError && statusCode == 200) {
-        if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE) {
+        if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE || m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE) {
             emit requestFinished(m_networkParams);
+            if (m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE) {
+                if (m_pFile && m_pFile->remove()) {
+                    qDebug() << "remove tmp file:" << m_pFile->fileName() << " success";
+                } else {
+                    qDebug() << "remove tmp file:" << m_pFile->fileName() << " failed";
+                }
+            }
             if (nullptr != m_pFile) {
                 m_pFile->close();
                 delete m_pFile;
@@ -468,9 +480,17 @@ void MyNetworkController::onReplyFinished(QNetworkReply *reply) {
             emit loginFailed(msg);
         } else if (REQUEST_DELETE_FILE == m_networkParams.httpRequestType) {
             emit deleteFileFailed(m_networkParams, msg);
-        } else if (REQUEST_UPLOAD_FILE == m_networkParams.httpRequestType) {
+        } else if (REQUEST_UPLOAD_FILE == m_networkParams.httpRequestType
+                   || REQUEST_UPLOAD_TMPFILE == m_networkParams.httpRequestType) {
             emit uploadFileFailed(m_networkParams, msg);
             if (nullptr != m_pFile) {
+                if (REQUEST_UPLOAD_TMPFILE == m_networkParams.httpRequestType) {
+                    if (m_pFile->remove()) {
+                        qDebug() << "remove tmp file:" << m_pFile->fileName() << " success";
+                    } else {
+                        qDebug() << "remove tmp file:" << m_pFile->fileName() << " failed";
+                    }
+                }
                 m_pFile->close();
                 delete m_pFile;
                 m_pFile = nullptr;

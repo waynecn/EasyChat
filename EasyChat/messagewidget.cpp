@@ -53,6 +53,13 @@ MessageWidget::MessageWidget(QWidget *parent) :
     if (!dir.exists()) {
         dir.mkpath(APPLICATION_IMAGE_DIR);
     }
+    qDebug() << "APPLICATION_IMAGE_DIR:" << APPLICATION_IMAGE_DIR;
+    APPLICATION_TMPIMAGE_DIR = APPLICATION_DIR + "/.images";
+    QDir tmpDir(APPLICATION_TMPIMAGE_DIR);
+    if (!tmpDir.exists()) {
+        tmpDir.mkpath(APPLICATION_TMPIMAGE_DIR);
+    }
+    qDebug() << "APPLICATION_TMPIMAGE_DIR:" << APPLICATION_TMPIMAGE_DIR;
 
     connect(&g_WebSocket, SIGNAL(textMessageReceived(const QString &)), this, SLOT(OnWebSocketMsgReceived(const QString &)));
     connect(&g_WebSocket, SIGNAL(pong(quint64, const QByteArray &)), this, SLOT(onPongMessage(quint64, const QByteArray &)));

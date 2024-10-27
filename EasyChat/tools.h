@@ -16,6 +16,7 @@ public:
     }
 
     QString GetCurrentTime2();   //YYYY-MM-DD HH:mm:SS
+    QString GetCurrentTime3();
     QByteArray GenerateWebsocketMsg(MessageStruct &msg);
     QByteArray GenerateOnlineUserMessage();
     QString GenerateRandomID();

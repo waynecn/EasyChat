@@ -1,0 +1,19 @@
+1.用bat命令将release拷贝到打包目录，如：
+copy E:\2.projects\git\EasyChat\build-EasyChat-Desktop_Qt_5_12_3_MinGW_64_bit-Release\release\EasyChat.exe E:\2.QtPackages\EasyChat-new\Release-mingw-64\EasyChat.exe
+
+2.deploye流程，如下：
+cd /d C:\Qt\Qt5.12.3\5.12.3\mingw73_64\bin
+copy E:\2.projects\git\EasyChat\build-EasyChat-Desktop_Qt_5_12_3_MinGW_64_bit-Release\release\EasyChat.exe E:\2.QtPackages\EasyChat-new\Release-mingw-64\EasyChat.exe
+.\windeployqt.exe E:\2.QtPackages\EasyChat-new\Release-mingw-64\EasyChat.exe
+以上步骤打包之后执行可执行程序看是否能运行起来，如果运行失败需要手动替换一些文件
+C:\Qt\Qt5.12.3\5.12.3\mingw73_64\bin中的
+D3Dcompiler_47.dll
+libEGL.dll
+libgcc_s_seh-1.dll
+libGLESV2.dll
+libstdc++-6.dll
+libwinpthread-1.dll
+
+3.创建InnoSetup脚本准备打包
+参考脚本：
+EasyChat-1.2.5-mingw-64.iss

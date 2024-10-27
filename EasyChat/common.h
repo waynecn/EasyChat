@@ -16,7 +16,7 @@ const QString SETTING_REMEMBER_PASSWORD = "SETTING_REMEMBER_PASSWORD";
 const QString SETTING_SAVE_FILE_DIR = "SETTING_SAVE_FILE_DIR";
 const QString SETTING_USE_TCP = "SETTING_USE_TCP";
 
-static QString APPLICATION_VERSION = "1.2.4";
+static QString APPLICATION_VERSION = "1.2.5";
 
 extern QString g_userID;        //current logined user info
 extern QString g_userName;      //current logined user info
@@ -34,6 +34,8 @@ extern QString APPLICATION_DIR;
 
 extern QString APPLICATION_IMAGE_DIR;
 
+extern QString APPLICATION_TMPIMAGE_DIR;  //when we send a clipboard image data, we save image to this temporary dir, after send over, delete the tmp file
+
 enum MsgType {
     NORMAL_MSG,
     FILE_MSG,
@@ -47,6 +49,7 @@ enum HttpRequest {
     REQUEST_LOGIN,
     REQUEST_REGISTER,
     REQUEST_UPLOAD_FILE,
+    REQUEST_UPLOAD_TMPFILE,
     REQUEST_DOWNLOAD_FILE,
     REQUEST_DOWNLOAD_IMAGE,
     REQUEST_GET_UPLOAD_FILES,
@@ -54,6 +57,7 @@ enum HttpRequest {
     REQUEST_UPLOAD_CLIENT,
     REQUEST_DOWNLOAD_CLIENT,
     REQUEST_UPLOAD_FILE_BY_TCP,
+    REQUEST_UPLOAD_TMPFILE_BY_TCP,
     REQUEST_DOWNLOAD_FILE_BY_TCP
 };
 

@@ -37,6 +37,7 @@ MainChatWidget::MainChatWidget(QWidget *parent) :
     connect(m_pMessageWidget, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
     connect(m_pMessageWidget, SIGNAL(uploadingClient(NetworkParams &)), this, SIGNAL(uploadingClient(NetworkParams &)));
     connect(m_pInputMessageWidget, SIGNAL(uploadFile(QString &)), this, SLOT(UploadFile(QString &)));
+    connect(m_pInputMessageWidget, SIGNAL(uploadTmpFile(QString &)), this, SLOT(UploadTmpFile(QString &)));
 }
 
 MainChatWidget::~MainChatWidget()
@@ -217,6 +218,68 @@ void MainChatWidget::UploadFile(QString &filePath) {
     }
 }
 
+void MainChatWidget::UploadTmpFile(QString &filePath) {
+    QMessageBox box;
+    box.setWindowTitle("提示");
+    box.addButton("确定", QMessageBox::AcceptRole);
+    QPushButton *reject = box.addButton("取消", QMessageBox::RejectRole);
+    box.setText(QString("上传文件:%1?").arg(filePath));
+    box.exec();
+
+    if (box.clickedButton() == reject) {
+        QFile f(filePath);
+        f.remove();
+        return;
+    }
+
+    filePath = filePath.replace("\\", "/");
+    qDebug() << "filePath:" << filePath;
+
+    QSettings settings;
+    if (settings.value(SETTING_USE_TCP, false).toBool()) {
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.httpRequestType = REQUEST_UPLOAD_TMPFILE_BY_TCP;
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.toUserID = g_toUserID;
+        params.toUserName = g_toUserName;
+        params.filePath = filePath;
+        QString fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+        params.fileName = fileName;
+        params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + fileName;
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
+
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit uploadingFile(params);
+    } else {
+        NetworkParams params;
+        params.paramID = tools::GetInstance()->GenerateRandomID();
+        params.httpRequestType = REQUEST_UPLOAD_TMPFILE;
+        params.userID = g_userID;
+        params.userName = g_userName;
+        params.toUserID = g_toUserID;
+        params.toUserName = g_toUserName;
+        params.filePath = filePath;
+        QString fileName = filePath.mid(filePath.lastIndexOf("/") + 1);
+        params.fileName = fileName;
+        params.fileLink = "http://" + g_serverHost + ":" + g_serverPort + "/uploads/" + fileName;
+        params.requestTime = tools::GetInstance()->GetCurrentTime2();
+
+        MyNetworkController *controller = new MyNetworkController(params);
+        connect(controller, SIGNAL(requestFinished(NetworkParams &)), this, SLOT(OnRequestFinished(NetworkParams &)));
+        connect(controller, SIGNAL(updateRequestProcess(NetworkParams &)), this, SIGNAL(updateRequestProcess(NetworkParams &)));
+        connect(controller, SIGNAL(uploadFileFailed(NetworkParams &, QString &)), this, SLOT(onUploadFileFailed(NetworkParams &, QString &)));
+        controller->StartWork();
+        //emit upload file actions for file widget to show the uploading progress
+        emit uploadingFile(params);
+    }
+}
+
 void MainChatWidget::on_sendFilePushButton_clicked()
 {
     QFileDialog dialog;
@@ -294,14 +357,14 @@ void MainChatWidget::OnRequestFinished(NetworkParams &params) {
     msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
     msgStruct.msg = m_pInputMessageWidget->GetInputMessage();
     msgStruct.uploadToPersonalSpace = params.uploadToPersonalSpace;
-    if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
+    if (params.httpRequestType == REQUEST_UPLOAD_FILE || params.httpRequestType == REQUEST_UPLOAD_TMPFILE) {
         msgStruct.fileName = params.fileName;
         msgStruct.fileUrl = params.fileLink;
         m_pMessageWidget->SendMessage2(msgStruct);
         m_pInputMessageWidget->ClearMessageContent();
     } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
         qDebug() << "下载完成，保存至：" << params.saveFileDir;
-    } else if (params.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
+    } else if (params.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || params.httpRequestType == REQUEST_UPLOAD_TMPFILE_BY_TCP) {
         msgStruct.fileName = params.fileName;
         msgStruct.fileUrl = params.fileLink;
         m_pMessageWidget->SendMessage2(msgStruct);
@@ -330,3 +393,39 @@ void MainChatWidget::onUploadFileFailed(NetworkParams &params, QString &msg) {
 void MainChatWidget::onDownloadFileFailed(NetworkParams &params, QString &msg) {
     QMessageBox::warning(nullptr, "WARN", "下载文件:" + params.fileName + " 失败:" + msg);
 }
+
+//void MainChatWidget::OnTmpRequestFinished(NetworkParams &params, QString &fullName) {
+//    if (params.httpRequestType == REQUEST_GET_UPLOAD_FILES) {
+//        return;
+//    }
+//    MessageStruct msgStruct;
+//    msgStruct.userID = g_userID;
+//    msgStruct.userName = g_userName;
+//    msgStruct.toUserID = params.toUserID;
+//    msgStruct.toUserName = params.toUserName;
+//    msgStruct.sendTime = tools::GetInstance()->GetCurrentTime2();
+//    msgStruct.msg = m_pInputMessageWidget->GetInputMessage();
+//    msgStruct.uploadToPersonalSpace = params.uploadToPersonalSpace;
+//    if (params.httpRequestType == REQUEST_UPLOAD_FILE) {
+//        msgStruct.fileName = params.fileName;
+//        msgStruct.fileUrl = params.fileLink;
+//        m_pMessageWidget->SendMessage2(msgStruct);
+//        m_pInputMessageWidget->ClearMessageContent();
+//    } else if (params.httpRequestType == REQUEST_DOWNLOAD_FILE) {
+//        qDebug() << "下载完成，保存至：" << params.saveFileDir;
+//    } else if (params.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
+//        msgStruct.fileName = params.fileName;
+//        msgStruct.fileUrl = params.fileLink;
+//        m_pMessageWidget->SendMessage2(msgStruct);
+//        m_pInputMessageWidget->ClearMessageContent();
+//    }
+//    QFile f(fullName);
+//    if (!f.remove()) {
+//        QMessageBox::warning(nullptr, "WARN", "临时文件:" + fullName + "删除失败");
+//    }
+//    qDebug() << "tmp file:" << fullName << " removed";
+//}
+//
+//void MainChatWidget::onUploadTmpFileFailed(NetworkParams &params, QString &msg) {
+//    QMessageBox::warning(nullptr, "WARN", "上传文件:" + params.fileName + " 失败:" + msg);
+//}

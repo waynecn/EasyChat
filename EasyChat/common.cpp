@@ -18,6 +18,8 @@ QString APPLICATION_DIR = "";
 
 QString APPLICATION_IMAGE_DIR = "";
 
+QString APPLICATION_TMPIMAGE_DIR = "";
+
 void RestartApp() {
     QString exeFile = APPLICATION_DIR + "/EasyChat.exe";
     QProcess::startDetached(exeFile, QStringList());

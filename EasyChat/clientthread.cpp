@@ -38,7 +38,7 @@ void ClientThread::run() {
     if (m_pClient == nullptr) {
         m_pClient = new Client(this);
     }
-    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP) {
+    if (m_networkParams.httpRequestType == REQUEST_UPLOAD_FILE_BY_TCP || m_networkParams.httpRequestType == REQUEST_UPLOAD_TMPFILE_BY_TCP) {
         if (m_pClient->Connect()) {
             qDebug() << __FUNCTION__ << " ready send file with params";
             m_pClient->SendFileWithParams(m_networkParams);

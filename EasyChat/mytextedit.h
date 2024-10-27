@@ -15,8 +15,12 @@ private:
     bool canInsertFromMimeData(const QMimeData *source);
     void insertFromMimeData(const QMimeData *source);
 
+    bool saveRGB32(QImage &image);
+    bool saveARGB32(QImage &image);
+
 signals:
     void uploadFile(QString &filePath);
+    void uploadTmpFile(QString &filePath);
 };
 
 #endif // MYTEXTEDIT_H

@@ -17,6 +17,10 @@ QString tools::GetCurrentTime2() {
     return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 }
 
+QString tools::GetCurrentTime3() {
+    return QDateTime::currentDateTime().toString("yyyy-MM-dd-HHmmsszzz");
+}
+
 QByteArray tools::GenerateWebsocketMsg(MessageStruct &msg) {
     QJsonObject obj;
     obj["username"] = msg.userName;

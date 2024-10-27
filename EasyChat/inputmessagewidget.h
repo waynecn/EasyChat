@@ -33,6 +33,7 @@ private:
 signals:
     void sendMessage(MessageStruct &msg);
     void uploadFile(QString &filePath);
+    void uploadTmpFile(QString &filePath);
 };
 
 #endif // INPUTMESSAGEWIDGET_H
